@@ -1,0 +1,16 @@
+*-debug.log
+*-error.log
+.oclif.manifest.json
+.git
+/.nyc_output
+/dist
+/lib
+/tmp
+.idea
+/yarn.lock
+node_modules
+.DS_Store
+/test-results.xml
+coverage/
+junit.xml
+package-lock.json

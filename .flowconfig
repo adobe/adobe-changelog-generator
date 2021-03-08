@@ -1,0 +1,10 @@
+[ignore]
+.*/node_modules/.*
+.*/lib/.*
+.*/flow-coverage/.*
+.*/flow-typed/.*
+.*
+
+[options]
+all=true
+module.ignore_non_literal_requires=true

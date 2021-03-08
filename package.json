@@ -1,0 +1,83 @@
+{
+  "name": "adobe-changelog-generator",
+  "version": "1.0.0",
+  "dependencies": {
+    "@adobe/aio-lib-core-config": "^2.0.0",
+    "@octokit/rest": "^18.3.1",
+    "babel-cli": "^6.26.0",
+    "date-fns": "^2.16.1",
+    "lodash": "^4.17.20",
+    "request": "^2.79.0"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-flow-strip-types": "^7.13.0",
+    "@babel/preset-flow": "^7.12.13",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^8.2.2",
+    "eslint": "^6.8.0",
+    "eslint-config-oclif": "^3.1.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-flowtype": "^5.3.1",
+    "eslint-plugin-import": "^2.21.2",
+    "eslint-plugin-jest": "^23.13.2",
+    "eslint-plugin-jsdoc": "^21.0.0",
+    "eslint-plugin-node": "^10.0.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1",
+    "flow-babel-webpack-plugin": "^1.1.1",
+    "flow-bin": "^0.63.1",
+    "flow-coverage-report": "^0.4.0",
+    "flow-remove-types": "^1.2.3",
+    "flow-typed": "^2.2.3",
+    "flow-webpack-plugin": "^1.2.0",
+    "jest": "^24",
+    "jest-haste-map": "^24.5.0",
+    "jest-junit": "^6.0.0",
+    "jest-resolve": "^24.5.0",
+    "stdout-stderr": "^0.1.13",
+    "webpack": "^5.24.2",
+    "webpack-cli": "^4.5.0"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "/dist"
+  ],
+  "license": "Apache-2.0",
+  "main": "src/index.js",
+  "scripts": {
+    "pretest": "npm run lint",
+    "lint": "eslint \"src/**/*.js\"",
+    "test": "npm run unit-tests",
+    "unit-tests": "jest --ci",
+    "e2e": "jest --collectCoverage=false --testRegex './e2e/e2e.js'",
+    "flow:coverage": "flow-coverage-report -i '**/*.js' -x 'node_modules/**' -x 'flow-typed/**'",
+    "build": "webpack --config 'webpack.config.js'",
+    "eslint:fix": "eslint --fix './src/**/*.js'",
+    "eslint:fix-dist": "eslint --fix './dist/**/*.js'",
+    "flow:check": "flow check",
+    "flow:deps": "flow-typed install",
+    "dev": "watch 'npm run flow:check & npm run lint & npm run build' ./src",
+    "prelink": "cp package.json dist",
+    "link": "cd ./dist && npm link"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "testPathIgnorePatterns": [
+      "<rootDir>/tests/fixtures/"
+    ],
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/tests/fixtures/"
+    ],
+    "reporters": [
+      "default",
+      "jest-junit"
+    ],
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "./jest.setup.js"
+    ]
+  }
+}

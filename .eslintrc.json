@@ -1,0 +1,22 @@
+{
+    "extends": [
+        "plugin:flowtype/recommended"
+    ],
+    "parser": "babel-eslint",
+    "parserOptions": {
+        "sourceType": "module"
+    },
+    "rules": {
+        "flowtype/space-after-type-colon": [ 2, "never", { "allowLineBreak": false } ],
+        "flowtype/no-types-missing-file-annotation": 0,
+        "semi": [2, "always"]
+    },
+    "plugins": [
+        "flowtype"
+    ],
+    "settings": {
+        "jsdoc": {
+            "ignorePrivate": true
+        }
+    }
+}

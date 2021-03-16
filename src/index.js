@@ -11,7 +11,6 @@ governing permissions and limitations under the License.
 
 import type { LoaderInterface } from './api/loader-interface';
 import type { FilterInterface } from './api/filter-interface';
-import type { FactoryInterface } from "./api/factory-interface";
 const aioConfig = require('@adobe/aio-lib-core-config');
 const _ = require('lodash');
 const GithubService = require('./services/github');

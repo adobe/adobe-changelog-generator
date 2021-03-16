@@ -26,8 +26,6 @@ class PullRequestLoader implements LoaderInterface {
     groupBy:Object = {}
   ) {
     this.githubGraphQlClient = githubService.getGraphQlClient();
-    this.filters = filters;
-    this.groupBy = groupBy;
   }
 
   async execute (
@@ -37,8 +35,8 @@ class PullRequestLoader implements LoaderInterface {
     to:Date
   ):Promise<Array<PullRequestData>> {
     const formatPattern = 'yyyy-MM-dd';
-    const sdate = formatFns(from.getTime(), formatPattern);
-    const edate = formatFns(to.getTime(), formatPattern);
+    const startDate = formatFns(from.getTime(), formatPattern);
+    const endDate = formatFns(to.getTime(), formatPattern);
     let cursor = null;
     let hasNextPage = null;
     let after = '';
@@ -48,7 +46,7 @@ class PullRequestLoader implements LoaderInterface {
     do {
       after = cursor ? `after:"${cursor}"` : '';
       query = `{
-        search(first: 50, query: "repo:${organization}/${repository} is:pr is:merged created:${sdate}..${edate}", type: ISSUE ${after}) {
+        search(first: 50, query: "repo:${organization}/${repository} is:pr is:merged created:${startDate}..${endDate}", type: ISSUE ${after}) {
           nodes {
             ... on PullRequest {
               title
@@ -97,21 +95,13 @@ class PullRequestLoader implements LoaderInterface {
         pr.author.login.search(regexpThird) === -1
     );
 
-    for (const filter of this.filters) {
-      result = filter.execute(result);
-    }
-
-    if (this.groupBy) {
-      result = this.groupBy.execute(result);
-    }
-
     return result.map((item:Object) => ({
         repository,
         organization,
         title: item.title,
         url: item.url,
         author: item.author.login,
-        labels: item.nodes,
+        labels: item.labels.nodes,
         createdAt: item.createdAt,
         contributionType: item.contributionType,
         number: item.number

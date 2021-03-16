@@ -27,7 +27,7 @@ class LabelsGroup {
         const temp = [];
         Object.keys(this.map).forEach((type:string) => {
           if (
-            this.map[type].filter(label => _.includes(item.labels.nodes.map(data => data.name), label)).length
+            this.map[type].filter(label => _.includes(item.labels.map(data => data.name), label)).length
           ) {
             temp.push(type);
           }

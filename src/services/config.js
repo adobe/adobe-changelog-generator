@@ -30,7 +30,20 @@ class ConfigService {
     };
   }
 
-  async getInRepoConfigs (namespaces:Array<string>, configPath:string = '/.github/changelog.json'):Object {
+  parseReleaseLine (releaseLine:string):Object {
+      let match, filter, version, from, to;
+      [match, filter] = releaseLine.split(':');
+      [match, version] = match.split('@');
+      [from, to] = match.split('..');
+
+      return {from, to, version, filter};
+  }
+
+  async getRemoteByNamespace (namespace:string):Object | Error {
+
+  }
+
+  async getRemoteConfigs (namespaces:Array<string>, configPath:string = '/.github/changelog.json'):Object {
     const result = {};
     for (const namespace of namespaces) {
       const { organization, repository, branch } = this.parseNamespace(namespace);
@@ -47,7 +60,27 @@ class ConfigService {
     return result;
   }
 
-  async getLocalConfigs (namespaces:Array<string>, configPath?:string, pathType:string):Object {
+    async getRemote (namespace:string, configPath:string = '/.github/changelog.json'):Object {
+       const { organization, repository, branch } = this.parseNamespace(namespace);
+       const response = await this.githubRestClient.repos.getContent({
+            owner: organization,
+            path: configPath,
+            repo: repository,
+            ref: branch || 'master'
+       }).then((res) => res.data || {}).catch(() => {});
+       return response
+           ? JSON.parse(Buffer.from(response.content, 'base64').toString('binary'))
+           : null;
+    }
+
+    async getLocal (configPath?:string, pathType:string):Object {
+        return  configPath
+            ? fileLoader.load(configPath, pathType)
+            : this.aioConfig.get('changelog') || {};
+    }
+
+
+    async getLocalConfigs (namespaces:Array<string>, configPath?:string, pathType:string):Object {
     const localConfig = configPath
       ? fileLoader.load(configPath, pathType)
       : this.aioConfig.get('changelog') || {};

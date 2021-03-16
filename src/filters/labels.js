@@ -28,7 +28,7 @@ class LabelsFilter implements FilterInterface {
       }
 
       for (let i = 0; i < this.labels.length; i++) {
-        if (item.labels.nodes.map(labelItem => labelItem.name).includes(this.labels[i])) {
+        if (item.labels.map(labelItem => labelItem.name).includes(this.labels[i])) {
           return false;
         }
       }

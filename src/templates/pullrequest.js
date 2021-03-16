@@ -17,7 +17,7 @@ module.exports = (data:Object):string => {
   Object.keys(data).forEach((np) => {
     result += namespaceTemplate(np);
     Object.keys(data[np]).forEach((tag:string) => {
-      result += tagTemplate(tag, data[np][tag].createdAt);
+      result += tagTemplate(tag, data[np][tag].to);
       const contributionType = _.groupBy(data[np][tag].data, 'contributionType');
       Object.keys(contributionType).forEach((type:string) => {
         result += contributionTypeTemplate(type);
@@ -36,7 +36,7 @@ const namespaceTemplate = (namespace:string) => `
   =============`;
 
 const tagTemplate = (tag:string, creationDate:Date) => `
-  ## ${tag} (${formatFns(creationDate.getTime(), 'yyyy-MM-dd')})`;
+  ## ${tag} (${formatFns((new Date(creationDate)).getTime(), 'yyyy-MM-dd')})`;
 
 const contributionTypeTemplate = (contributionType:string) => `
   ### ${contributionType}

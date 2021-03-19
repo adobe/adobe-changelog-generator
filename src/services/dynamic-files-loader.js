@@ -5,6 +5,10 @@ const vm = require("vm");
 class DynamicFilesLoader {
     dir:string;
     cache:Object;
+
+    /**
+     * @param {string} dir - path to dir
+     */
     constructor(dir:string) {
     	this.dir = dir;
     	this.cache = {};

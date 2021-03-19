@@ -14,6 +14,10 @@ import type { PullRequestData } from '../api/data/pullrequest.js';
 
 class LabelsFilter implements FilterInterface {
     labels:Array<string>
+
+    /**
+     * @param {string} labels
+     */
     constructor (labels:Array<string>) {
     	this.labels = labels;
     }

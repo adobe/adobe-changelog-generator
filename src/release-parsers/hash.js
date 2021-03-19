@@ -4,6 +4,9 @@ class Hash {
     regexp:RegExp;
     githubService:Object;
 
+    /**
+     * @param {Object} githubService
+     */
     constructor(githubService:Object) {
     	this.githubService = githubService;
     	this.sortOrder = 10;

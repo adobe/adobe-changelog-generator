@@ -12,20 +12,26 @@ governing permissions and limitations under the License.
 const fileLoader = require('./file');
 
 class ConfigService {
-  aioConfig:Object
-  githubRestClient:Object
-  constructor (githubService:Object, aioConfig:Object) {
-  	this.githubRestClient = githubService.getRestClient();
-  	this.aioConfig = aioConfig;
-  }
+    aioConfig:Object
+    githubRestClient:Object
 
-  /**
+    /**
+     *
+     * @param {Object} githubService
+     * @param {Object} aioConfig
+     */
+    constructor (githubService:Object, aioConfig:Object) {
+  	    this.githubRestClient = githubService.getRestClient();
+  	    this.aioConfig = aioConfig;
+    }
+
+    /**
      * Parses namespace pattern. Namespace example: adobe/adobe-changelog-generator:master
      *
      * @param {string} namespace
      * @return {{organization: string, repository: string, branch: string}} | Error
      */
-  parseNamespace (namespace:string):Object | Error {
+    parseNamespace (namespace:string):Object | Error {
   	const parsed:Array<string> = namespace.match(/(.*)\/(.*):(.*)/) || [];
 
   	if (!parsed[1] || !parsed[2] || !parsed[3]) {
@@ -40,31 +46,31 @@ class ConfigService {
   		repository: parsed[2],
   		branch: parsed[3]
   	};
-  }
+    }
 
-  /**
+    /**
      * Parses release line. Example: <type>..<type>@<version>:<regexp>
      *
      * @param {string} releaseLine
      * @return {{filter: string, from: string, to: string, version: string}}
      */
-  parseReleaseLine (releaseLine:string):Object | Error {
+    parseReleaseLine (releaseLine:string):Object | Error {
   	let match, filter, version, from, to;
   	[match, filter] = releaseLine.split(':');
   	[match, version] = match.split('@');
   	[from, to] = match.split('..');
 
   	return {from, to, version, filter};
-  }
+    }
 
-  /**
+    /**
      * Loads config from repository
      *
      * @param {string} namespace
      * @param {string} configPath - path to config location
      * @return {Promise<Object|null>}
      */
-  async getRemote (namespace:string, configPath:string = '/.github/changelog.json'):Object {
+    async getRemote (namespace:string, configPath:string = '/.github/changelog.json'):Object {
   	const { organization, repository, branch } = this.parseNamespace(namespace);
   	const response = await this.githubRestClient.repos.getContent({
   		owner: organization,
@@ -75,20 +81,20 @@ class ConfigService {
   	return response
   		? JSON.parse(Buffer.from(response.content, 'base64').toString('binary'))
   		: null;
-  }
+    }
 
-  /**
+    /**
      * Loads local config
      *
      * @param {string} configPath - path to config location
      * @param {string} pathType - path type (absolute|relative). Default: Absolute
      * @return {Promise<JSON|Error|*>}
      */
-  async getLocal (configPath?:string, pathType:string):Object {
+    async getLocal (configPath?:string, pathType:string):Object {
   	return  configPath
   		? fileLoader.load(configPath, pathType)
   		: this.aioConfig.get('changelog') || {};
-  }
+    }
 }
 
 module.exports = ConfigService;

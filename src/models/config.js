@@ -14,6 +14,10 @@ const _ = require('lodash');
 class Config {
     data:Object
     name:string
+
+    /**
+     * @param {Object} data
+     */
     constructor (data:Object):void {
     	this.data = data;
     }

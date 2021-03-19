@@ -14,6 +14,10 @@ const _ = require('lodash');
 
 class LabelsGroup {
     map:Object
+
+    /**
+     * @param {Object} map
+     */
     constructor (map:Object) {
     	this.map = map;
     }

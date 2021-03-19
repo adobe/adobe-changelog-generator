@@ -20,12 +20,18 @@ class PullRequestLoader implements LoaderInterface {
   githubGraphQlClient:graphql
   filters:Array<FilterInterface>
   groupBy:Object
+
+  /**
+     * @param githubService
+     * @param filters
+     * @param groupBy
+     */
   constructor (
-  	githubService:graphql,
-  	filters:Array<FilterInterface> = [],
-  	groupBy:Object = {}
+  	    githubService:graphql,
+  	    filters:Array<FilterInterface> = [],
+  	    groupBy:Object = {}
   ) {
-  	this.githubGraphQlClient = githubService.getGraphQlClient();
+  	    this.githubGraphQlClient = githubService.getGraphQlClient();
   }
 
   /**

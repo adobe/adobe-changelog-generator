@@ -14,21 +14,25 @@ const { graphql } = require('@octokit/graphql');
 const Octokit = require('@octokit/rest').Octokit;
 
 class Github {
-  graphqlClient:graphql
-  restClient:Octokit
-  constructor (token:string):void {
-  	this.graphqlClient = graphql.defaults({ headers: { authorization: `token ${token}` } });
-  	this.restClient = new Octokit({ auth: `token ${token}` });
-  }
+    graphqlClient:graphql
+    restClient:Octokit
 
-  /**
+    /**
+     * @param {string} token
+     */
+    constructor (token:string):void {
+  	    this.graphqlClient = graphql.defaults({ headers: { authorization: `token ${token}` } });
+  	    this.restClient = new Octokit({ auth: `token ${token}` });
+    }
+
+    /**
      * Returns all project tags from Github
      *
      * @param {string} org
      * @param {string} repo
      * @return {Promise<{}>}
      */
-  async getAllTags (org:string, repo:string) {
+    async getAllTags (org:string, repo:string) {
   	let query;
   	let cursor = null;
   	let hasNextPage = null;
@@ -75,25 +79,25 @@ class Github {
   		};
   	});
   	return data;
-  }
+    }
 
-  /**
+    /**
      * Returns Github Rest Client
      *
      * @return {Octokit}
      */
-  getRestClient () {
+    getRestClient () {
   	return this.restClient;
-  }
+    }
 
-  /**
+    /**
      * Returns Github GraphQL Client
      *
      * @return {graphql}
      */
-  getGraphQlClient () {
+    getGraphQlClient () {
   	return this.graphqlClient;
-  }
+    }
 }
 
 module.exports = Github;

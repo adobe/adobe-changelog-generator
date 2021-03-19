@@ -9,107 +9,86 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const fileLoader = require('../file-loader');
-const _ = require('lodash');
+const fileLoader = require('./file');
 
 class ConfigService {
-  client:Object
   aioConfig:Object
   githubRestClient:Object
   constructor (githubService:Object, aioConfig:Object) {
-    this.githubRestClient = githubService.getRestClient();
-    this.aioConfig = aioConfig;
+  	this.githubRestClient = githubService.getRestClient();
+  	this.aioConfig = aioConfig;
   }
 
-  parseNamespace (namespace:string):Object {
-    const parsed:Array<string> = namespace.match(/(.*)\/(.*):(.*)/) || [];
-    return {
-      organization: parsed[1],
-      repository: parsed[2],
-      branch: parsed[3]
-    };
+  /**
+     * Parses namespace pattern. Namespace example: adobe/adobe-changelog-generator:master
+     *
+     * @param {string} namespace
+     * @return {{organization: string, repository: string, branch: string}} | Error
+     */
+  parseNamespace (namespace:string):Object | Error {
+  	const parsed:Array<string> = namespace.match(/(.*)\/(.*):(.*)/) || [];
+
+  	if (!parsed[1] || !parsed[2] || !parsed[3]) {
+  		throw new Error(`
+            The namespace pattern is broken, please configure namespace in correct pattern.
+            Pattern example: <organization>/<repository>:branch
+        `);
+  	}
+
+  	return {
+  		organization: parsed[1],
+  		repository: parsed[2],
+  		branch: parsed[3]
+  	};
   }
 
-  parseReleaseLine (releaseLine:string):Object {
-      let match, filter, version, from, to;
-      [match, filter] = releaseLine.split(':');
-      [match, version] = match.split('@');
-      [from, to] = match.split('..');
+  /**
+     * Parses release line. Example: <type>..<type>@<version>:<regexp>
+     *
+     * @param {string} releaseLine
+     * @return {{filter: string, from: string, to: string, version: string}}
+     */
+  parseReleaseLine (releaseLine:string):Object | Error {
+  	let match, filter, version, from, to;
+  	[match, filter] = releaseLine.split(':');
+  	[match, version] = match.split('@');
+  	[from, to] = match.split('..');
 
-      return {from, to, version, filter};
+  	return {from, to, version, filter};
   }
 
-  async getRemoteByNamespace (namespace:string):Object | Error {
-
+  /**
+     * Loads config from repository
+     *
+     * @param {string} namespace
+     * @param {string} configPath - path to config location
+     * @return {Promise<Object|null>}
+     */
+  async getRemote (namespace:string, configPath:string = '/.github/changelog.json'):Object {
+  	const { organization, repository, branch } = this.parseNamespace(namespace);
+  	const response = await this.githubRestClient.repos.getContent({
+  		owner: organization,
+  		path: configPath,
+  		repo: repository,
+  		ref: branch || 'master'
+  	}).then((res) => res.data || {}).catch(() => {});
+  	return response
+  		? JSON.parse(Buffer.from(response.content, 'base64').toString('binary'))
+  		: null;
   }
 
-  async getRemoteConfigs (namespaces:Array<string>, configPath:string = '/.github/changelog.json'):Object {
-    const result = {};
-    for (const namespace of namespaces) {
-      const { organization, repository, branch } = this.parseNamespace(namespace);
-      const response = await this.githubRestClient.repos.getContent({
-        owner: organization,
-        path: configPath,
-        repo: repository,
-        ref: branch || 'master'
-      }).then((res) => res.data || {}).catch(() => {});
-      result[namespace] = response
-        ? JSON.parse(Buffer.from(response.content, 'base64').toString('binary'))
-        : {};
-    }
-    return result;
-  }
-
-    async getRemote (namespace:string, configPath:string = '/.github/changelog.json'):Object {
-       const { organization, repository, branch } = this.parseNamespace(namespace);
-       const response = await this.githubRestClient.repos.getContent({
-            owner: organization,
-            path: configPath,
-            repo: repository,
-            ref: branch || 'master'
-       }).then((res) => res.data || {}).catch(() => {});
-       return response
-           ? JSON.parse(Buffer.from(response.content, 'base64').toString('binary'))
-           : null;
-    }
-
-    async getLocal (configPath?:string, pathType:string):Object {
-        return  configPath
-            ? fileLoader.load(configPath, pathType)
-            : this.aioConfig.get('changelog') || {};
-    }
-
-
-    async getLocalConfigs (namespaces:Array<string>, configPath?:string, pathType:string):Object {
-    const localConfig = configPath
-      ? fileLoader.load(configPath, pathType)
-      : this.aioConfig.get('changelog') || {};
-
-    return !namespaces.length ? localConfig : filterItems(localConfig, namespaces);
-  }
-
-  async validate (config:Object):Promise<Array<string>> {
-    const requiredFields = ['tag', 'loader.name', 'output.template'];
-    const errors = [];
-    Object.keys(config).forEach(namespace => {
-      const invalidFields = requiredFields.filter(field => !_.get(config[namespace], field));
-      if (!invalidFields.length) {
-        return;
-      }
-      errors.push(
-        invalidFields.length === 1
-          ? `${namespace} is invalid. Field ${invalidFields[0]} is required`
-          : `${namespace} is invalid. Fields: ${invalidFields.join(', ')} are required`
-      );
-    });
-    return errors;
+  /**
+     * Loads local config
+     *
+     * @param {string} configPath - path to config location
+     * @param {string} pathType - path type (absolute|relative). Default: Absolute
+     * @return {Promise<JSON|Error|*>}
+     */
+  async getLocal (configPath?:string, pathType:string):Object {
+  	return  configPath
+  		? fileLoader.load(configPath, pathType)
+  		: this.aioConfig.get('changelog') || {};
   }
 }
-
-const filterItems = (localConfig:Object, namespaces:Array<string>):Object => {
-  const res = {};
-  namespaces.forEach(item => { res[item] = localConfig[item]; });
-  return res;
-};
 
 module.exports = ConfigService;

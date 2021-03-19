@@ -17,20 +17,27 @@ class Github {
   graphqlClient:graphql
   restClient:Octokit
   constructor (token:string):void {
-    this.graphqlClient = graphql.defaults({ headers: { authorization: `token ${token}` } });
-    this.restClient = new Octokit({ auth: `token ${token}` });
+  	this.graphqlClient = graphql.defaults({ headers: { authorization: `token ${token}` } });
+  	this.restClient = new Octokit({ auth: `token ${token}` });
   }
 
+  /**
+     * Returns all project tags from Github
+     *
+     * @param {string} org
+     * @param {string} repo
+     * @return {Promise<{}>}
+     */
   async getAllTags (org:string, repo:string) {
-    let query;
-    let cursor = null;
-    let hasNextPage = null;
-    let after = '';
-    let response = null;
-    let result = [];
-    do {
-      after = cursor ? `after:"${cursor}"` : '';
-      query = `
+  	let query;
+  	let cursor = null;
+  	let hasNextPage = null;
+  	let after = '';
+  	let response = null;
+  	let result = [];
+  	do {
+  		after = cursor ? `after:"${cursor}"` : '';
+  		query = `
         {
           repository(name: "${repo}", owner: "${org}") {
             refs(refPrefix: "refs/tags/", first: 100, orderBy: {field: TAG_COMMIT_DATE, direction: ASC} ${after}) {
@@ -54,28 +61,38 @@ class Github {
             }
           }
         }`;
-      response = await this.graphqlClient(query);
-      hasNextPage = response.repository.refs.pageInfo.hasNextPage;
-      cursor = response.repository.refs.pageInfo.endCursor;
-      result = [...result, ...response.repository.refs.nodes];
-    } while (hasNextPage);
+  		response = await this.graphqlClient(query);
+  		hasNextPage = response.repository.refs.pageInfo.hasNextPage;
+  		cursor = response.repository.refs.pageInfo.endCursor;
+  		result = [...result, ...response.repository.refs.nodes];
+  	} while (hasNextPage);
 
-    const data = {};
-    result.forEach((item, index) => {
-      data[item.name] = {
-        from: result[index - 1] ? data[result[index - 1].name].to : new Date('2000/01/01'),
-        to: new Date(item.target.committedDate || item.target.tagger.date)
-      };
-    });
-    return data;
+  	const data = {};
+  	result.forEach((item, index) => {
+  		data[item.name] = {
+  			from: result[index - 1] ? data[result[index - 1].name].to : new Date('2000/01/01'),
+  			to: new Date(item.target.committedDate || item.target.tagger.date)
+  		};
+  	});
+  	return data;
   }
 
+  /**
+     * Returns Github Rest Client
+     *
+     * @return {Octokit}
+     */
   getRestClient () {
-    return this.restClient;
+  	return this.restClient;
   }
 
+  /**
+     * Returns Github GraphQL Client
+     *
+     * @return {graphql}
+     */
   getGraphQlClient () {
-    return this.graphqlClient;
+  	return this.graphqlClient;
   }
 }
 

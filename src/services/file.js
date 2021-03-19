@@ -12,15 +12,27 @@ governing permissions and limitations under the License.
 const pathLib = require('path');
 const fs = require('fs');
 module.exports = {
-  load: (path:string, type:string):JSON | Error => {
-      return JSON.parse(fs.readFileSync(
-          type === 'relative' ? pathLib.join(process.cwd(), path) : path
-      ));
-  },
+    /**
+     * Loads JSON file
+     * @param {string} path - Path to the file
+     * @param {string} type - Type of the path (Absolute|Relative)
+     * @return {JSON|Error}
+     */
+    load: (path:string, type:string):JSON | Error => {
+        return JSON.parse(fs.readFileSync(
+            type === 'relative' ? pathLib.join(process.cwd(), path) : path
+        ));
+    },
 
-  create: (path:string, data:string):void | Error => {
-    fs.writeFile(path, data,  (err:?Error):void => {
-      if (err) {throw err;}
-    });
-  }
+    /**
+     * Creates file
+     *
+     * @param path
+     * @param data
+     */
+    create: (path:string, data:string):void | Error => {
+        fs.writeFile(path, data,  (err:?Error):void => {
+            if (err) {throw err;}
+        });
+    }
 };

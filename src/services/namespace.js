@@ -10,6 +10,12 @@ governing permissions and limitations under the License.
 */
 
 class NamespaceService {
+    /**
+     * Returns all namespaces from config
+     *
+     * @param config
+     * @return {string[]}
+     */
     getNames(config:Object):Array<string> {
         return Object.keys(config);
     }

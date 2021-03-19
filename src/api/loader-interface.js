@@ -14,15 +14,24 @@ import type { PullRequestData } from './data/pullrequest.js';
 import { graphql } from '@octokit/graphql';
 
 export interface LoaderInterface {
-  constructor(
-    githubClient:graphql,
-    filters:Array<FilterInterface>,
-    groupBy:Object
-  ):void,
-  execute(
-    organization:string,
-    repository:string,
-    from:Date,
-    to:Date,
-  ):Promise<Array<PullRequestData>>
+    constructor(
+        githubClient:graphql,
+        filters:Array<FilterInterface>,
+        groupBy:Object
+    ):void,
+
+    /**
+     * Loads data from Github by specific rules
+     *
+     * @param organization
+     * @param repository
+     * @param from
+     * @param to
+     */
+    execute(
+        organization:string,
+        repository:string,
+        from:Date,
+        to:Date,
+    ):Promise<Array<PullRequestData>>
 }

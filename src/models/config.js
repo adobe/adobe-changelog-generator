@@ -15,48 +15,78 @@ class Config {
     data:Object
     name:string
     constructor (data:Object):void {
-        this.data = data;
+    	this.data = data;
     }
 
+    /**
+     * @return {string}
+     */
     getLoaderName ():string {
-        return this.data.loader.name;
+    	return this.data.loader.name;
     }
 
+    /**
+     * @return {*|{}}
+     */
     getFilters ():Object {
-        return _.get(this.data, 'loader.config.exclude') || {};
+    	return _.get(this.data, 'loader.config.exclude') || {};
     }
 
+    /**
+     * @return {string[]}
+     */
     getFilterNames():Array<string> {
-        return Object.keys(this.getFilters());
+    	return Object.keys(this.getFilters());
     }
 
+    /**
+     * @param name
+     * @return {Object}
+     */
     getFilter(name:string):Array<string> {
-        return this.getFilters()[name];
+    	return this.getFilters()[name];
     }
 
-
+    /**
+     * @return {string}
+     */
     getGroupName ():string {
-        return _.get(this.data, 'loader.config.groupBy.name');
+    	return _.get(this.data, 'loader.config.groupBy.name');
     }
 
+    /**
+     * @return {Object}
+     */
     getGroupConfig ():Object {
-        return _.get(this.data, 'loader.config.groupBy.config');
+    	return _.get(this.data, 'loader.config.groupBy.config');
     }
 
+    /**
+     * @return {string}
+     */
     getTemplate ():string {
-        return _.get(this.data, 'output.template');
+    	return _.get(this.data, 'output.template');
     }
 
+    /**
+     * @return {string}
+     */
     getProjectPath ():string {
-        return _.get(this.data, 'output.projectPath');
+    	return _.get(this.data, 'output.projectPath');
     }
 
+    /**
+     * @return {string}
+     */
     getFilename ():string {
-        return _.get(this.data, 'output.filename');
+    	return _.get(this.data, 'output.filename');
     }
 
+    /**
+     * @return {Object}
+     */
     getCombined ():Object {
-        return _.get(this.data, 'combine');
+    	return _.get(this.data, 'combine');
     }
 }
 

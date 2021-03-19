@@ -19,6 +19,8 @@ class LabelsFilter implements FilterInterface {
     }
 
     /**
+     * Filters data by specific labels
+     *
      * @param data
      * @return {Array<PullRequestData>|PullRequestData[]}
      */

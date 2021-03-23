@@ -29,10 +29,9 @@ module.exports = {
      *
      * @param path
      * @param data
+     * @param callback
      */
-    create: (path:string, data:string):void | Error => {
-        fs.writeFile(path, data,  (err:?Error):void => {
-            if (err) {throw err;}
-        });
+    create: (path:string, data:string, callback?:Function):void | Error => {
+        return fs.writeFile(path, data, callback);
     }
 };

@@ -15,16 +15,4 @@ describe('GetRegExp', () => {
     it('Check matching with wrong day', async () => {
         expect('2021-03-44T15:11:59+0000'.match(dateParser.getRegExp())).toBeFalsy()
     });
-})
-
-describe('GetDate', () => {
-    it('Check successful result with simple ISO-8601 date', async () => {
-        expect((await dateParser.getDate('adobe', 'adobe-changelog-generator', '2020-01-18')).getTime())
-            .toBe(1579413599999)
-    });
-    it('Check successful ISO-8601 result with time and timezone', async () => {
-        expect((await dateParser.getDate('adobe', 'adobe-changelog-generator', '2021-03-21T15:11:59')).getTime())
-            .toBe(1616357519000)
-    });
-})
-
+});

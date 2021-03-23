@@ -17,8 +17,7 @@ describe('GetParsers', () => {
         expect(dynamicFilesLoaderMock.getAllMock).toHaveBeenCalledTimes(1);
         expect(dynamicFilesLoaderMock.getSortOrderFirst).toHaveBeenCalledTimes(1);
         expect(dynamicFilesLoaderMock.getSortOrderSecond).toHaveBeenCalledTimes(1);
-        expect(parsers[0]).toStrictEqual(dynamicFilesLoaderMock.parserFirst);
-        expect(parsers[1]).toStrictEqual(dynamicFilesLoaderMock.parserSecond);
+        expect(parsers.length).toBe(2);
     })
 })
 

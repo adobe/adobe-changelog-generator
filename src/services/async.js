@@ -10,22 +10,38 @@ governing permissions and limitations under the License.
 */
 
 module.exports = {
-  mapValuesAsync: (obj:Object, asyncFn:Function):Promise<Object> => {
-    const keys = Object.keys(obj);
-    const promises = keys.map((k) => {
-      return asyncFn(obj[k], k).then(newValue => {
-        return { key: k, value: newValue };
-      });
-    });
-    return Promise.all(promises).then((values:Array<Object>):Object => {
-      const newObj:Object = {};
-      values.forEach((v:Object):void => {
-        newObj[v.key] = v.value;
-      });
-      return newObj;
-    });
-  },
-  mapAsync: (arr:Array, asyncFn:Function):Promise<Array> => {
-       return Promise.all(arr.map(asyncFn));
-  }
+    /**
+     * The same with mapValues but async
+     *
+     * @param obj
+     * @param asyncFn
+     * @return {Promise<Object>}
+     */
+    mapValuesAsync: (obj:Object, asyncFn:Function):Promise<Object> => {
+        const keys = Object.keys(obj);
+        const promises = keys.map((k) => {
+            return asyncFn(obj[k], k).then(newValue => {
+                return { key: k, value: newValue };
+            });
+        });
+
+        return Promise.all(promises).then((values:Array<Object>):Object => {
+            const newObj:Object = {};
+            values.forEach((v:Object):void => {
+                newObj[v.key] = v.value;
+            });
+            return newObj;
+        });
+    },
+
+    /**
+     * The same with map but async
+     *
+     * @param arr
+     * @param asyncFn
+     * @return {Promise<unknown[]>}
+     */
+    mapAsync: (arr:Array, asyncFn:Function):Promise<Array> => {
+        return Promise.all(arr.map(asyncFn));
+    }
 };

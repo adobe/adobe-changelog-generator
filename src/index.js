@@ -9,126 +9,223 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import type { LoaderInterface } from './api/loader-interface.js';
-import type { FilterInterface } from './api/filter-interface.js';
-import type { PullRequestData } from './api/data/pullrequest.js';
+import type { LoaderInterface } from './api/loader-interface';
+import type { FilterInterface } from './api/filter-interface';
 const aioConfig = require('@adobe/aio-lib-core-config');
 const _ = require('lodash');
 const GithubService = require('./services/github');
 const ConfigService = require('./services/config');
-const TagService = require('./services/tag');
 const asyncService = require('./services/async');
 const templateManager = require('./template-manager');
-const NamespaceConfig = require('./models/namespace-config');
+const Config = require('./models/config');
 const loaderManager = require('./loader-manager');
 const filterManager = require('./filter-manager');
 const groupManager = require('./group-manager');
 const fileService = require('./services/file');
-
+const RangeService = require("./services/range");
+const NamespaceService = require("./services/namespace");
 
 class Index {
     configService:Object
-    tagService:Object
     githubService:Object
+    rangeService:Object
+    namespaceService:Object
 
-    constructor (token:string) {
-        this.githubService = new GithubService(token);
-        this.configService = new ConfigService(this.githubService, aioConfig);
-        this.tagService = new TagService(this.githubService);
+    /**
+     * @param {string} token - Github access token
+     * @param {string} configPath - Path to config location
+     * @param {string} configPathType - Type of the path (Absolute|Relative)
+     */
+    constructor (token:string, configPath?:string, configPathType?:string) {
+    	this.githubService = new GithubService(token);
+    	this.configService = new ConfigService(this.githubService, aioConfig);
+    	this.rangeService = new RangeService(this.githubService);
+    	this.namespaceService = new NamespaceService();
+    	this.configPath = configPath;
+    	this.configPathType = configPathType;
     }
 
-    async getConfig (repositories:Array<string>, configPath:string, pathType:string) {
-        const localConfig = await this.configService.getLocalConfigs(repositories, configPath, pathType);
-        const inRepoConfig = await this.configService.getInRepoConfigs(Object.keys(localConfig));
-        return _.merge(inRepoConfig, localConfig);
+    /**
+     * Generate changelog file for multiple namespaces
+     *
+     * @param {Array<string>} namespaceNames - List on namespaces. Example: ['adobe/adobe-changelog-generator:master']
+     * @return {Promise<void>}
+     */
+    async generate(namespaceNames?:Array<string>) {
+    	const configLocal = await this.configService.getLocal(this.configPath, this.configPathType);
+    	const namespaceNamesList = namespaceNames && namespaceNames.length ?
+    		namespaceNames : this.namespaceService.getNames(configLocal);
+    	for await (const namespaceName of namespaceNamesList) {
+    		await this.generateNamespace(namespaceName, configLocal[namespaceName]);
+    	}
     }
 
-    async validateConfig (config:Object) {
-        const commonConfigErrors = await this.configService.validate(config);
-        return commonConfigErrors.length ? commonConfigErrors : null;
+    /**
+     * Generate changelog for one namespace
+     *
+     * @param {string} namespaceName - name of namespace
+     * @param {Object} configLocal - configuration from local machine
+     * @return {Promise<void>}
+     */
+    async generateNamespace(namespaceName:string, configLocal:Object) {
+    	const { releaseLine, combine, ...configOptions } = _.merge(
+    		await this.configService.getRemote(namespaceName),
+    		configLocal
+    	);
+
+    	const sharedConfig = new Config(configOptions);
+    	const loader:LoaderInterface = await this.getLoader(sharedConfig);
+    	const groupBy = await this.getGroup(sharedConfig);
+    	const filters = await this.getFilters(sharedConfig);
+    	const template = templateManager.get(sharedConfig.getTemplate());
+    	const data = await asyncService.mapValuesAsync(
+    		{[namespaceName]: releaseLine, ...combine},
+    		(releaseLine, namespaceName) => this.getData(
+    			namespaceName,
+    			releaseLine,
+    			loader,
+    			groupBy,
+    			filters
+    		)
+    	);
+
+    	fileService.create(
+    		`${sharedConfig.getProjectPath()}/${sharedConfig.getFilename()}`,
+    		template(data)
+    	);
     }
 
-    async getNamespaceMeta (namespaceConfig:NamespaceConfig) {
-        const namespaceTags = {
-            [namespaceConfig.getName()]: { tag: namespaceConfig.getTag() },
-            ...namespaceConfig.getCombined()
-        };
+    /**
+     * Collect data for namespace
+     *
+     * @param {string} namespaceName - namespace name
+     * @param {string} releaseLine - release line field from configuration. Pattern: <type>..<type>@<version>:<regexp>
+     * @param {Object} loader - Data loader
+     * @param {Object|null} groupBy - Groups data
+     * @param {Array<Object>|null} filters - Filters data
+     * @return {Promise<Object>}
+     */
+    async getData(
+    	namespaceName:string,
+    	releaseLine:string,
+    	loader:LoaderInterface,
+    	groupBy?:Object,
+    	filters?:Array<FilterInterface>
+    ):Array<Object> {
+    	const parsedNamespace = this.configService.parseNamespace(namespaceName);
+    	const parsedReleaseLine = this.configService.parseReleaseLine(releaseLine);
+    	const timeRange = await this.rangeService.getRange(
+    		parsedNamespace.organization,
+    		parsedNamespace.repository,
+    		parsedReleaseLine.from,
+    		parsedReleaseLine.to,
+    	);
 
-        return await asyncService.mapValuesAsync(
-            namespaceTags,
-            async (data, np) => {
-                const parsedNamespace = this.configService.parseNamespace(np);
-                return {
-                    ...parsedNamespace,
-                    versions: await this.tagService.getTagDates(
-                        data.tag,
-                        parsedNamespace.organization,
-                        parsedNamespace.repository
-                    )
-                };
-            }
-        );
+    	const versionsRange = await this.rangeService.getVersions(
+    		parsedNamespace.organization,
+    		parsedNamespace.repository,
+    		timeRange.from,
+    		timeRange.to,
+    		parsedReleaseLine.filter,
+    		parsedReleaseLine.version
+    	);
+
+    	let data = await loader.execute(
+    		parsedNamespace.organization,
+    		parsedNamespace.repository,
+    		timeRange.from,
+    		timeRange.to
+    	);
+
+    	if (filters && filters.length) { data = await this.applyFilters(data, filters); }
+    	if (groupBy) { data = await this.applyGrouping(data, [groupBy]); }
+
+    	return  this.getDataToVersionsMapping(data, versionsRange);
     }
 
-    async getDataForNamespace (namespaceConfig:NamespaceConfig) {
-        const namespaceMeta = await this.getNamespaceMeta(namespaceConfig);
-        const Loader = loaderManager.get(namespaceConfig.getLoaderName());
-        const filtersConfig = namespaceConfig.getFilters();
-        const GroupByClass = namespaceConfig.getGroupName() ? groupManager.get(namespaceConfig.getGroupName()) : null;
-        const groupBy = GroupByClass ? new GroupByClass(namespaceConfig.getGroupConfig()) : null;
-        const dataLoader:LoaderInterface = new Loader(
-            this.githubService,
-            Object.keys(filtersConfig).map((ftr:string) => {
-                const FtrClass = filterManager.get(ftr);
-                const filter:FilterInterface = new FtrClass(filtersConfig[ftr]);
-                return filter;
-            }),
-            groupBy
-        );
+    /**
+     * Maps the data to corresponded version
+     *
+     * @param {Array<Object>} data
+     * @param {Object} versionsRange - list of versions that were released between range
+     * @return {Object} Mapped data to version object
+     */
+    getDataToVersionsMapping(data:Array<Object>, versionsRange:Object):Object {
+    	data.forEach((item:Object) => {
+    		const version = _.findKey(versionsRange, (versionRange:Object, versionName:string) => {
+    			const createdAtTimestamp = (new Date(item.createdAt)).getTime();
+    			const fromTimestamp = (new Date(versionRange.from)).getTime();
+    			const toTimestamp = (new Date(versionRange.to)).getTime();
+    			return createdAtTimestamp > fromTimestamp && createdAtTimestamp < toTimestamp;
+    		});
+    		if (!versionsRange[version].data) { versionsRange[version].data = []; }
+    		versionsRange[version].data.push(item);
+    	});
 
-        return asyncService.mapValuesAsync(namespaceMeta, async (data, np) => {
-            return await asyncService.mapValuesAsync(data.versions, async (dateRange) => {
-                const data:Array<PullRequestData> = await dataLoader.execute(
-                    namespaceMeta[np].organization,
-                    namespaceMeta[np].repository,
-                    dateRange.from,
-                    dateRange.to
-                );
-                return {
-                    createdAt: dateRange.to,
-                    data: data.map(item => ({
-                        ...item,
-                        repository: namespaceMeta[np].repository,
-                        organization: namespaceMeta[np].organization,
-                        author: item.author.login
-                    }))
-                };
-            });
-        });
+    	return versionsRange;
     }
 
-    async getGeneratedTemplate(
-        namespaceConfig:NamespaceConfig,
-        data:Array<Object>,
-        beforeGeneration:? Function,
-        afterGeneration:? Function
-        ) {
-        templateManager.get(namespaceConfig.getTemplate())(data);
+    /**
+     * Loaded and instantiate corresponded Group class based on configuration
+     *
+     * @param {Object} sharedConfig - config that contains same values for main and related namespaces
+     * @return {Promise<Object|null>}
+     */
+    async getGroup (sharedConfig:Object) {
+    	const Group = groupManager.get(sharedConfig.getGroupName());
+    	return sharedConfig.getGroupName() ?
+    		new Group(sharedConfig.getGroupConfig()) : null;
     }
 
-    async execute (config:Object) {
-        for await (const np of Object.keys(config)) {
-            console.log(`Generation Changelog for ${np}...`);
-            const namespaceConfig = new NamespaceConfig(np, config[np]);
-            const data = await this.getDataForNamespace(namespaceConfig);
-            const generatedTemplate = await this.getGeneratedTemplate(namespaceConfig, data);
+    /**
+     * Loaded and instantiate corresponded Loader class based on configuration
+     *
+     * @param {Object} sharedConfig - config that contains same values for main and related namespaces
+     * @return {Promise<Object>}
+     */
+    async getLoader(sharedConfig:Object) {
+    	const Loader = await loaderManager.get(sharedConfig.getLoaderName());
+    	return new Loader(this.githubService);
+    }
 
-            fileService.create(
-                `${namespaceConfig.getProjectPath()}/${namespaceConfig.getFilename()}`,
-                data
-            );
-            console.log(`Changelog for ${np} is generated and available by the path: ${namespace.getProjectPath()}/${namespace.getFilename()}`);
-        }
+    /**
+     * Loaded and instantiate corresponded Filter classes based on configuration
+     *
+     * @param {Object} sharedConfig - config that contains same values for main and related namespaces
+     * @return {Promise<Object>}
+     */
+    async getFilters(sharedConfig:Object) {
+    	const filterNames:Array<string> = sharedConfig.getFilterNames();
+    	const filterClasses:Object = filterManager.get(filterNames);
+    	return filterNames.map((name:string) => new filterClasses[name](sharedConfig.getFilter(name)));
+    }
+
+    /**
+     * Apply grouping on array of data
+     *
+     * @param {Array<Object>} data - loaded data
+     * @param {Array<Object>} groupBy - array of group class instances
+     * @return {Promise<Array<Object>>} - grouped data
+     */
+    async applyGrouping(data:Array<Object>, groupBy:Array<Object>) {
+    	for (const group of groupBy) {
+    		data = group.execute(data);
+    	}
+    	return data;
+    }
+
+    /**
+     * Apply filters on array of data
+     *
+     * @param {Array<Object>} data - loaded data
+     * @param {Array<Object>} filters - array of filter class instances
+     * @return {Promise<Array<Object>>} - filtered data
+     */
+    async applyFilters(data:Array<Object>, filters:Array<Object>) {
+    	for (const filter of filters) {
+    		data = filter.execute(data);
+    	}
+    	return data;
     }
 }
 

@@ -20,35 +20,48 @@ class PullRequestLoader implements LoaderInterface {
   githubGraphQlClient:graphql
   filters:Array<FilterInterface>
   groupBy:Object
+
+  /**
+     * @param githubService
+     * @param filters
+     * @param groupBy
+     */
   constructor (
-    githubService:graphql,
-    filters:Array<FilterInterface> = [],
-    groupBy:Object = {}
+  	    githubService:graphql,
+  	    filters:Array<FilterInterface> = [],
+  	    groupBy:Object = {}
   ) {
-    this.githubGraphQlClient = githubService.getGraphQlClient();
-    this.filters = filters;
-    this.groupBy = groupBy;
+  	    this.githubGraphQlClient = githubService.getGraphQlClient();
   }
 
+  /**
+     * Load data from Github
+     *
+     * @param organization
+     * @param repository
+     * @param from
+     * @param to
+     * @return {Promise<{createdAt: Object.createdAt, contributionType: Object.contributionType, number: Object.number, author: Object.author.login, organization: string, repository: string, title: Object.title, url: Object.url, labels: Object.labels.nodes}[]>}
+     */
   async execute (
-    organization:string,
-    repository:string,
-    from:Date,
-    to:Date
+  	organization:string,
+  	repository:string,
+  	from:Date,
+  	to:Date
   ):Promise<Array<PullRequestData>> {
-    const formatPattern = 'yyyy-MM-dd';
-    const sdate = formatFns(from.getTime(), formatPattern);
-    const edate = formatFns(to.getTime(), formatPattern);
-    let cursor = null;
-    let hasNextPage = null;
-    let after = '';
-    let query = '';
-    let response = null;
-    let result = [];
-    do {
-      after = cursor ? `after:"${cursor}"` : '';
-      query = `{
-        search(first: 50, query: "repo:${organization}/${repository} is:pr is:merged created:${sdate}..${edate}", type: ISSUE ${after}) {
+  	const formatPattern = 'yyyy-MM-dd';
+  	const startDate = formatFns(from.getTime(), formatPattern);
+  	const endDate = formatFns(to.getTime(), formatPattern);
+  	let cursor = null;
+  	let hasNextPage = null;
+  	let after = '';
+  	let query = '';
+  	let response = null;
+  	let result = [];
+  	do {
+  		after = cursor ? `after:"${cursor}"` : '';
+  		query = `{
+        search(first: 50, query: "repo:${organization}/${repository} is:pr is:merged created:${startDate}..${endDate}", type: ISSUE ${after}) {
           nodes {
             ... on PullRequest {
               title
@@ -82,40 +95,32 @@ class PullRequestLoader implements LoaderInterface {
         }
       }`;
 
-      response = await this.githubGraphQlClient(query);
-      hasNextPage = false;// response.search.pageInfo.hasNextPage
-      cursor = response.search.pageInfo.endCursor;
-      result = [...result, ...response.search.nodes];
-    } while (hasNextPage);
+  		response = await this.githubGraphQlClient(query);
+  		hasNextPage = false;// response.search.pageInfo.hasNextPage
+  		cursor = response.search.pageInfo.endCursor;
+  		result = [...result, ...response.search.nodes];
+  	} while (hasNextPage);
 
-    const regexpFirst = /\[bot\]/gm;
-    const regexpSecond = /(-|^)bot(-|$)/gm;
-    const regexpThird = /dependabot/gm;
-    result = result.filter((pr) => pr.author &&
+  	const regexpFirst = /\[bot\]/gm;
+  	const regexpSecond = /(-|^)bot(-|$)/gm;
+  	const regexpThird = /dependabot/gm;
+  	result = result.filter((pr) => pr.author &&
         pr.author.login.search(regexpFirst) === -1 &&
         pr.author.login.search(regexpSecond) === -1 &&
         pr.author.login.search(regexpThird) === -1
-    );
+  	);
 
-    for (const filter of this.filters) {
-      result = filter.execute(result);
-    }
-
-    if (this.groupBy) {
-      result = this.groupBy.execute(result);
-    }
-
-    return result.map((item:Object) => ({
-        repository,
-        organization,
-        title: item.title,
-        url: item.url,
-        author: item.author.login,
-        labels: item.nodes,
-        createdAt: item.createdAt,
-        contributionType: item.contributionType,
-        number: item.number
-    }));
+  	return result.map((item:Object) => ({
+  		repository,
+  		organization,
+  		title: item.title,
+  		url: item.url,
+  		author: item.author.login,
+  		labels: item.labels.nodes,
+  		createdAt: item.createdAt,
+  		contributionType: item.contributionType,
+  		number: item.number
+  	}));
   }
 }
 module.exports = PullRequestLoader;

@@ -13,12 +13,22 @@ import type { FileManagerInterface } from './api/file-manager-interface.js';
 
 const filters = {};
 const FileManager:FileManagerInterface = {
-  get: (name:string):Function => {
-    if (!filters[name]) {
-      filters[name] = require(`./filters/${name}.js`);
+    /**
+     * Loads filter from filters folder by names
+     *
+     * @param {Array<string>} names - filter names
+     * @return {{}}
+     */
+    get: (names:Array<string>):Function => {
+        const result = {};
+        for (const name of names) {
+            if (!filters[name]) {
+                result[name] = filters[name] = require(`./filters/${name}.js`);
+            }
+        }
+
+        return result;
     }
-    return filters[name];
-  }
 };
 
 module.exports = FileManager;

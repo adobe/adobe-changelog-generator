@@ -13,22 +13,22 @@ const _ = require('lodash');
 const formatFns = require('date-fns/format');
 
 module.exports = (data:Object):string => {
-  let result = '';
-  Object.keys(data).forEach((np) => {
-    result += namespaceTemplate(np);
-    Object.keys(data[np]).forEach((tag:string) => {
-      result += tagTemplate(tag, data[np][tag].createdAt);
-      const contributionType = _.groupBy(data[np][tag].data, 'contributionType');
-      Object.keys(contributionType).forEach((type:string) => {
-        result += contributionTypeTemplate(type);
-        contributionType[type].forEach(pr => {
-          result += contributionTemplate(pr.organization, pr.repository, pr.number, pr.title, pr.author);
+    let result = '';
+    Object.keys(data).forEach((np) => {
+        result += namespaceTemplate(np);
+        Object.keys(data[np]).forEach((tag:string) => {
+            result += tagTemplate(tag, data[np][tag].to);
+            const contributionType = _.groupBy(data[np][tag].data, 'contributionType');
+            Object.keys(contributionType).forEach((type:string) => {
+                result += contributionTypeTemplate(type);
+                contributionType[type].forEach(pr => {
+                    result += contributionTemplate(pr.organization, pr.repository, pr.number, pr.title, pr.author);
+                });
+            });
         });
-      });
     });
-  });
 
-  return result;
+    return result;
 };
 
 const namespaceTemplate = (namespace:string) => `
@@ -36,7 +36,7 @@ const namespaceTemplate = (namespace:string) => `
   =============`;
 
 const tagTemplate = (tag:string, creationDate:Date) => `
-  ## ${tag} (${formatFns(creationDate.getTime(), 'yyyy-MM-dd')})`;
+  ## ${tag} (${formatFns((new Date(creationDate)).getTime(), 'yyyy-MM-dd')})`;
 
 const contributionTypeTemplate = (contributionType:string) => `
   ### ${contributionType}

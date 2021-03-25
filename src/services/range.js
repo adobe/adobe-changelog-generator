@@ -89,23 +89,30 @@ class Range {
      * @return {Promise<*>}
      */
     async getVersions(org:string, repo:string, from:string, to:string, filter?:string, version?:string) {
-  	const versions = await this.githubService.getAllTags(org, repo);
-  	const versionsList = Object.keys(versions);
-  	const mergedTags = {...versions, [version]: {from: versions[versionsList[versionsList.length -1]].to, to}};
-  	const fromTimestamp = (new Date(from)).getTime();
-  	const toTimestamp = (new Date(to)).getTime();
-  	return _.pickBy(mergedTags, (data, name) => {
-  		const tagFromTimestamp = (new Date(data.from)).getTime();
-  		const tagToTimestamp = (new Date(data.to)).getTime();
+  	    const versions = await this.githubService.getAllTags(org, repo);
+  	    const versionsList = Object.keys(versions);
+  	    const lastReleaseDate = versions[versionsList[versionsList.length -1]].to;
+        const fromTimestamp = (new Date(from)).getTime();
+        const toTimestamp = (new Date(to)).getTime();
+  	    const mergedTags = {
+  	        ...versions,
+            [version]: {
+  	            from: lastReleaseDate,
+                to: (new Date(lastReleaseDate)).getTime() < toTimestamp ? to : new Date()
+  	        }};
 
-  		if (name.match(filter)) {
-  			return false;
-  		}
+  	    return _.pickBy(mergedTags, (data, name) => {
+  		    const tagFromTimestamp = (new Date(data.from)).getTime();
+  		    const tagToTimestamp = (new Date(data.to)).getTime();
 
-  		return (tagFromTimestamp >= fromTimestamp && tagFromTimestamp <= toTimestamp) ||
-                 (tagToTimestamp >= fromTimestamp && tagToTimestamp <= toTimestamp) ||
-                 (tagFromTimestamp < fromTimestamp && tagToTimestamp > toTimestamp);
-  	});
+  		    if (name.match(filter)) {
+  			    return false;
+  		    }
+
+  		    return (tagFromTimestamp >= fromTimestamp && tagFromTimestamp <= toTimestamp) ||
+                (tagToTimestamp >= fromTimestamp && tagToTimestamp <= toTimestamp) ||
+                (tagFromTimestamp < fromTimestamp && tagToTimestamp > toTimestamp);
+  	    });
     }
 }
 

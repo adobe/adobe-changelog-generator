@@ -60,7 +60,7 @@ class ConfigService {
   	[match, version] = match.split('@');
   	[from, to] = match.split('..');
 
-  	return {from, to, version, filter};
+  	    return {from, to, version, filter};
     }
 
     /**

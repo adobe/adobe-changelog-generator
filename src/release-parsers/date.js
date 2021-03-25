@@ -1,5 +1,8 @@
 const _ = require('lodash');
-class Hash {
+const endOfDay = require('date-fns/endOfDay');
+const parseISO = require('date-fns/parseISO');
+
+class Date {
     sortOrder:number;
     regexp:RegExp;
     githubService:Object;
@@ -9,8 +12,8 @@ class Hash {
      */
     constructor(githubService:Object) {
     	this.githubService = githubService;
-    	this.sortOrder = 10;
-    	this.regexp = /\b[0-9a-f]{40}\b/;
+    	this.sortOrder = 20;
+    	this.regexp = /^(\d{4}\-(0[1-9]|1[0-2]|[1-9])-(0[1-9]|1[0-9]|2[0-9]|3[0-1]|[1-9])([tT][\d:\.]*)?)([zZ]|([+\-])(\d\d):?(\d\d))?$/;
     }
 
     /**
@@ -36,11 +39,8 @@ class Hash {
      * @return {Promise<Date|null>}
      */
     async getDate(org:string, repo:string, point:string):Promise<Date> {
-    	const commit = await this.githubService.git.getCommit({ owner: org, repo, commit_sha: sha });
-    	return _.get(commit, 'data.committer.date') ?
-    		new Date(_.get(commit, 'data.committer.date')) :
-    		null;
+    	return point.split('T')[1] ? parseISO(point) : endOfDay(parseISO(point));
     }
 }
 
-module.exports = Hash;
+module.exports = Date;

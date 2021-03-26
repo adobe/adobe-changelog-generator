@@ -13,7 +13,7 @@ import type { ReleaseParsersInterface } from '../api/release-parsers-interface.j
 
 const _ = require('lodash');
 
-class Hash implements ReleaseParsersInterface {
+class Tag implements ReleaseParsersInterface {
     sortOrder:number;
     regexp:RegExp;
     githubService:Object;
@@ -22,23 +22,23 @@ class Hash implements ReleaseParsersInterface {
      * @param {Object} githubService
      */
     constructor(githubService:Object) {
-    	this.githubService = githubService;
-    	this.sortOrder = 10;
-    	this.regexp = /\b[0-9a-f]{40}\b/;
+        this.githubService = githubService;
+        this.sortOrder = 30;
+        this.regexp = /^([\S+]{1,20})$/;
     }
 
     /**
      * @return {number}
      */
     getSortOrder ():number {
-    	return this.sortOrder;
+        return this.sortOrder;
     }
 
     /**
      * @return {RegExp}
      */
     getRegExp ():RegExp {
-    	return this.regexp;
+        return this.regexp;
     }
 
     /**
@@ -50,11 +50,12 @@ class Hash implements ReleaseParsersInterface {
      * @return {Promise<Date|null>}
      */
     async getDate(org:string, repo:string, point:string):Promise<Date> {
-    	const commit = await this.githubService.git.getCommit({ owner: org, repo, commit_sha: point });
-    	return _.get(commit, 'data.committer.date') ?
-    		new Date(_.get(commit, 'data.committer.date')) :
-    		null;
+        const ref = await this.githubService.git.getRef({owner: org, repo, ref: `tags/${point}`});
+        const commit = await this.githubService.git.getCommit({owner: org, repo, commit_sha: ref.data.object.sha});
+        return _.get(commit, 'data.committer.date') ?
+            new Date(_.get(commit, 'data.committer.date')) :
+            null;
     }
 }
 
-module.exports = Hash;
+module.exports = Tag;

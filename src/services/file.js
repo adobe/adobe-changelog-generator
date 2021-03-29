@@ -32,6 +32,6 @@ module.exports = {
      * @param callback
      */
     create: (path:string, data:string, callback?:Function):void | Error => {
-        return fs.writeFile(path, data, callback);
+        return fs.writeFile(path, data, callback ? callback : () => {});
     }
 };

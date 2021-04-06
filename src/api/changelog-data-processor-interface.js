@@ -9,16 +9,15 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-class NamespaceService {
+export interface ChangelogDataProcessorInterface {
     /**
-     * Returns all namespaces from config
+     * Generate output based on changelog data
      *
-     * @param config
-     * @return {string[]}
+     * @param string changelogData
+     * @param changelogData
      */
-    getNames(config:Object):Array<string> {
-        return Object.keys(config);
-    }
+    generate(
+        outputType:string
+        changelogData:Array,
+    ):void
 }
-
-module.exports = NamespaceService;

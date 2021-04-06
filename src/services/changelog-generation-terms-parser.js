@@ -9,21 +9,22 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-export interface ReleaseParsersInterface {
+// TODO: interface "must have"
+class ChangelogGenerationTermsParser {
     /**
-     * Returns sort order
+     * Parses changelog generation terms. Example: <type>..<type>@<version>:<regexp>
+     *
+     * @param {string} terms
+     * @return {{filter: string, from: string, to: string, version: string}}
      */
-    getSortOrder():number;
+    parse(terms: string): Object | Error {
+        let match, filter, version, from, to;
+        [match, filter] = terms.split(':');
+        [match, version] = match.split('@');
+        [from, to] = match.split('..');
 
-    /**
-     * Returns regexp to parse release
-     */
-    getRegExp():RegExp;
-
-    /**
-     * @param org
-     * @param repo
-     * @param point
-     */
-    getDate(org:string, repo:string, point:string):Promise<Date>;
+        return {from, to, version, filter};
+    }
 }
+
+module.exports = ChangelogGenerationTermsParser;

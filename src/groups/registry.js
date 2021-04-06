@@ -12,9 +12,9 @@ governing permissions and limitations under the License.
 import type { FileManagerInterface } from './api/file-manager-interface.js';
 
 const groups = {};
-const GroupManager:FileManagerInterface = {
+const Registry:FileManagerInterface = {
     /**
-     * Loads group class from groups folder by name
+     * Loads group class by name
      *
      * @param name
      * @return {*}
@@ -27,4 +27,4 @@ const GroupManager:FileManagerInterface = {
     }
 };
 
-module.exports = GroupManager;
+module.exports = Registry;

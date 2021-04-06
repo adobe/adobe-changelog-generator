@@ -10,7 +10,9 @@
         "flowtype/space-after-type-colon": [ 2, "never", { "allowLineBreak": false } ],
         "flowtype/no-types-missing-file-annotation": 0,
         "semi": [2, "always"],
-        "indent": ["error", 4],
+        "indent": ["error", 4, {
+            "SwitchCase": 1
+        }],
         "require-jsdoc": ["error", {
             "require": {
                 "FunctionDeclaration": true,

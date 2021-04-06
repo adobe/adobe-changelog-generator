@@ -105,18 +105,18 @@ class Range {
         const lastReleasedSplit = lastReleased.split('.');
 
         switch (match[0]) {
-        case 'patch': {
-            ++lastReleasedSplit[2];
-            break;
-        }
-        case 'minor': {
-            ++lastReleasedSplit[1];
-            break;
-        }
-        case 'major': {
-            ++lastReleasedSplit[0];
-            break;
-        }
+            case 'patch': {
+                ++lastReleasedSplit[2];
+                break;
+            }
+            case 'minor': {
+                ++lastReleasedSplit[1];
+                break;
+            }
+            case 'major': {
+                ++lastReleasedSplit[0];
+                break;
+            }
         }
 
         return lastReleasedSplit.join('.');

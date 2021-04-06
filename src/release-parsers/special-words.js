@@ -16,15 +16,15 @@ const specialWords = require('../models/special-words');
 const addMilliseconds = require('date-fns/addMilliseconds');
 
 class SpecialWords implements ReleaseParsersInterface {
-    sortOrder: number;
-    regexp: RegExp;
-    githubService: Object;
-    githubRestClient: Object;
+    sortOrder:number;
+    regexp:RegExp;
+    githubService:Object;
+    githubRestClient:Object;
 
     /**
      * @param {Object} githubService
      */
-    constructor(githubService: Object) {
+    constructor(githubService:Object) {
         this.githubService = githubService;
         this.githubRestClient = this.githubService.getRestClient();
         this.sortOrder = 30;
@@ -34,14 +34,14 @@ class SpecialWords implements ReleaseParsersInterface {
     /**
      * @return {number}
      */
-    getSortOrder(): number {
+    getSortOrder():number {
         return this.sortOrder;
     }
 
     /**
      * @return {RegExp}
      */
-    getRegExp(): RegExp {
+    getRegExp():RegExp {
         return this.regexp;
     }
 
@@ -53,7 +53,7 @@ class SpecialWords implements ReleaseParsersInterface {
      * @param filter
      * @return {Promise<Date>}
      */
-    async getFromDate(org: string, repo: string, point: string, filter: ?RegExp): Promise<Date> {
+    async getFromDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
         return this.getDate(org, repo, point, filter);
     }
 
@@ -65,7 +65,7 @@ class SpecialWords implements ReleaseParsersInterface {
      * @param filter
      * @return {Promise<Date>}
      */
-    async getToDate(org: string, repo: string, point: string, filter: ?RegExp): Promise<Date> {
+    async getToDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
         return this.getDate(org, repo, point, filter);
     }
 
@@ -78,7 +78,7 @@ class SpecialWords implements ReleaseParsersInterface {
      * @param {RegExp} filter
      * @return {Promise<Date|null>}
      */
-    async getDate(org: string, repo: string, point: string, filter: ?RegExp): Promise<Date> {
+    async getDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
         let output;
 
         switch (point) {

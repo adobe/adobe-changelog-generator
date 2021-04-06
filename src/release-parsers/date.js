@@ -19,12 +19,14 @@ class Date implements ReleaseParsersInterface {
     sortOrder:number;
     regexp:RegExp;
     githubService:Object;
+    githubRestClient:Object;
 
     /**
      * @param {Object} githubService
      */
     constructor(githubService:Object) {
     	this.githubService = githubService;
+        this.githubRestClient = this.githubService.getRestClient();
     	this.sortOrder = 20;
     	this.regexp = /^(\d{4}\-(0[1-9]|1[0-2]|[1-9])-(0[1-9]|1[0-9]|2[0-9]|3[0-1]|[1-9])([tT][\d:\.]*)?)([zZ]|([+\-])(\d\d):?(\d\d))?$/;
     }
@@ -44,14 +46,39 @@ class Date implements ReleaseParsersInterface {
     }
 
     /**
+     *
+     * @param org
+     * @param repo
+     * @param point
+     * @param filter
+     * @return {Promise<Date>}
+     */
+    async getFromDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
+        return this.getDate(org, repo, point, filter);
+    }
+
+    /**
+     *
+     * @param org
+     * @param repo
+     * @param point
+     * @param filter
+     * @return {Promise<Date>}
+     */
+    async getToDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
+        return this.getDate(org, repo, point, filter);
+    }
+
+    /**
      * Gets commit from Github and returns commit created date
      *
      * @param {string} org
      * @param {string} repo
      * @param {string} point
+     * @param {RegExp} filter
      * @return {Promise<Date|null>}
      */
-    async getDate(org:string, repo:string, point:string):Promise<Date> {
+    async getDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
     	return point.split('T')[1] ? parseISO(point) : endOfDay(parseISO(point));
     }
 }

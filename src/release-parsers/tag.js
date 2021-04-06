@@ -9,7 +9,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import type { ReleaseParsersInterface } from '../api/release-parsers-interface.js';
+import type {ReleaseParsersInterface} from '../api/release-parsers-interface.js';
 
 const _ = require('lodash');
 
@@ -17,41 +17,56 @@ class Tag implements ReleaseParsersInterface {
     sortOrder:number;
     regexp:RegExp;
     githubService:Object;
+    githubRestClient:Object;
 
     /**
      * @param {Object} githubService
      */
     constructor(githubService:Object) {
         this.githubService = githubService;
-        this.sortOrder = 30;
+        this.githubRestClient = this.githubService.getRestClient();
+        this.sortOrder = 40;
         this.regexp = /^([\S+]{1,20})$/;
     }
 
     /**
      * @return {number}
      */
-    getSortOrder ():number {
+    getSortOrder():number {
         return this.sortOrder;
     }
 
     /**
      * @return {RegExp}
      */
-    getRegExp ():RegExp {
+    getRegExp():RegExp {
         return this.regexp;
     }
 
     /**
-     * Gets commit from Github and returns commit created date
      *
-     * @param {string} org
-     * @param {string} repo
-     * @param {string} point
-     * @return {Promise<Date|null>}
+     * @param org
+     * @param repo
+     * @param point
+     * @param filter
+     * @return {Promise<Date>}
      */
-    async getDate(org:string, repo:string, point:string):Promise<Date> {
-        const ref = await this.githubService.git.getRef({owner: org, repo, ref: `tags/${point}`});
-        const commit = await this.githubService.git.getCommit({owner: org, repo, commit_sha: ref.data.object.sha});
+    async getFromDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
+        const versions = await this.githubService.getAllTags(org, repo, filter);
+        return versions[point].from;
+    }
+
+    /**
+     *
+     * @param org
+     * @param repo
+     * @param point
+     * @param filter
+     * @return {Promise<Date>}
+     */
+    async getToDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
+        const ref = await this.githubRestClient.git.getRef({owner: org, repo, ref: `tags/${point}`});
+        const commit = await this.githubRestClient.git.getCommit({owner: org, repo, commit_sha: ref.data.object.sha});
         return _.get(commit, 'data.committer.date') ?
             new Date(_.get(commit, 'data.committer.date')) :
             null;

@@ -10,6 +10,7 @@ governing permissions and limitations under the License.
 */
 
 const fileLoader = require('./file');
+const specialWords = require('../models/special-words');
 
 class ConfigService {
     aioConfig:Object
@@ -20,9 +21,9 @@ class ConfigService {
      * @param {Object} githubService
      * @param {Object} aioConfig
      */
-    constructor (githubService:Object, aioConfig:Object) {
-  	    this.githubRestClient = githubService.getRestClient();
-  	    this.aioConfig = aioConfig;
+    constructor(githubService:Object, aioConfig:Object) {
+        this.githubRestClient = githubService.getRestClient();
+        this.aioConfig = aioConfig;
     }
 
     /**
@@ -31,21 +32,21 @@ class ConfigService {
      * @param {string} namespace
      * @return {{organization: string, repository: string, branch: string}} | Error
      */
-    parseNamespace (namespace:string):Object | Error {
-  	const parsed:Array<string> = namespace.match(/(.*)\/(.*):(.*)/) || [];
+    parseNamespace(namespace:string):Object | Error {
+        const parsed:Array<string> = namespace.match(/(.*)\/(.*):(.*)/) || [];
 
-  	if (!parsed[1] || !parsed[2] || !parsed[3]) {
-  		throw new Error(`
+        if (!parsed[1] || !parsed[2] || !parsed[3]) {
+            throw new Error(`
             The namespace pattern is broken, please configure namespace in correct pattern.
             Pattern example: <organization>/<repository>:branch
         `);
-  	}
+        }
 
-  	return {
-  		organization: parsed[1],
-  		repository: parsed[2],
-  		branch: parsed[3]
-  	};
+        return {
+            organization: parsed[1],
+            repository: parsed[2],
+            branch: parsed[3]
+        };
     }
 
     /**
@@ -54,13 +55,18 @@ class ConfigService {
      * @param {string} releaseLine
      * @return {{filter: string, from: string, to: string, version: string}}
      */
-    parseReleaseLine (releaseLine:string):Object | Error {
-  	let match, filter, version, from, to;
-  	[match, filter] = releaseLine.split(':');
-  	[match, version] = match.split('@');
-  	[from, to] = match.split('..');
+    parseReleaseLine(releaseLine:string):Object | Error {
+        let match, filter, version, from, to;
+        [match, filter] = releaseLine.split(':');
+        [match, version] = match.split('@');
+        [from, to] = match.split('..');
 
-  	    return {from, to, version, filter};
+        return {
+            from: from || specialWords.start,
+            to: to || specialWords.now,
+            version: version || 'patch',
+            filter
+        };
     }
 
     /**
@@ -70,17 +76,18 @@ class ConfigService {
      * @param {string} configPath - path to config location
      * @return {Promise<Object|null>}
      */
-    async getRemote (namespace:string, configPath:string = '/.github/changelog.json'):Object {
-  	const { organization, repository, branch } = this.parseNamespace(namespace);
-  	const response = await this.githubRestClient.repos.getContent({
-  		owner: organization,
-  		path: configPath,
-  		repo: repository,
-  		ref: branch || 'master'
-  	}).then((res) => res.data || {}).catch(() => {});
-  	return response
-  		? JSON.parse(Buffer.from(response.content, 'base64').toString('binary'))
-  		: null;
+    async getRemote(namespace:string, configPath:string = '/.github/changelog.json'):Object {
+        const {organization, repository, branch} = this.parseNamespace(namespace);
+        const response = await this.githubRestClient.repos.getContent({
+            owner: organization,
+            path: configPath,
+            repo: repository,
+            ref: branch || 'master'
+        }).then((res) => res.data || {}).catch(() => {
+        });
+        return response
+            ? JSON.parse(Buffer.from(response.content, 'base64').toString('binary'))
+            : null;
     }
 
     /**
@@ -90,10 +97,10 @@ class ConfigService {
      * @param {string} pathType - path type (absolute|relative). Default: Absolute
      * @return {Promise<JSON|Error|*>}
      */
-    async getLocal (configPath?:string, pathType:string):Object {
-  	return  configPath
-  		? fileLoader.load(configPath, pathType)
-  		: this.aioConfig.get('changelog') || {};
+    async getLocal(configPath?:string, pathType:string):Object {
+        return configPath
+            ? fileLoader.load(configPath, pathType)
+            : this.aioConfig.get('changelog') || {};
     }
 }
 

@@ -26,8 +26,10 @@ describe('GetByPoint', () => {
         DynamicFilesLoader.mockClear();
         dynamicFilesLoaderMock.getRegExpFirst.mockClear();
         dynamicFilesLoaderMock.getRegExpSecond.mockClear();
-        dynamicFilesLoaderMock.getDateFirst.mockClear();
-        dynamicFilesLoaderMock.getDateSecond.mockClear();
+        dynamicFilesLoaderMock.getFromFirst.mockClear();
+        dynamicFilesLoaderMock.getFromSecond.mockClear();
+        dynamicFilesLoaderMock.getToFirst.mockClear();
+        dynamicFilesLoaderMock.getToSecond.mockClear();
     });
 
     beforeAll(() => {
@@ -38,31 +40,37 @@ describe('GetByPoint', () => {
     })
 
     it('Check first Parser correct match', async () => {
-        const date = await rangeService.getByPoint('testFirst', 'adobe', 'changelog-generator');
+        const date = await rangeService.getByPoint('testFirst', 'from','adobe', 'changelog-generator');
         expect(dynamicFilesLoaderMock.getRegExpFirst).toHaveBeenCalledTimes(1);
         expect(dynamicFilesLoaderMock.getRegExpSecond).toHaveBeenCalledTimes(0);
-        expect(dynamicFilesLoaderMock.getDateFirst).toHaveBeenCalledTimes(1);
-        expect(dynamicFilesLoaderMock.getDateSecond).toHaveBeenCalledTimes(0);
+        expect(dynamicFilesLoaderMock.getFromFirst).toHaveBeenCalledTimes(1);
+        expect(dynamicFilesLoaderMock.getFromSecond).toHaveBeenCalledTimes(0);
+        expect(dynamicFilesLoaderMock.getToFirst).toHaveBeenCalledTimes(0);
+        expect(dynamicFilesLoaderMock.getToSecond).toHaveBeenCalledTimes(0);
         expect(date.getTime()).toBe((new Date('2021/03/20')).getTime())
 
     });
 
     it('Check second Parser correct match', async () => {
-        const date = await rangeService.getByPoint('testSecond', 'adobe', 'changelog-generator');
+        const date = await rangeService.getByPoint('testSecond', 'to','adobe', 'changelog-generator');
         expect(dynamicFilesLoaderMock.getRegExpFirst).toHaveBeenCalledTimes(1);
         expect(dynamicFilesLoaderMock.getRegExpSecond).toHaveBeenCalledTimes(1);
-        expect(dynamicFilesLoaderMock.getDateFirst).toHaveBeenCalledTimes(0);
-        expect(dynamicFilesLoaderMock.getDateSecond).toHaveBeenCalledTimes(1);
-        expect(date.getTime()).toBe((new Date('2021/03/21')).getTime())
+        expect(dynamicFilesLoaderMock.getToFirst).toHaveBeenCalledTimes(0);
+        expect(dynamicFilesLoaderMock.getToSecond).toHaveBeenCalledTimes(1);
+        expect(dynamicFilesLoaderMock.getFromFirst).toHaveBeenCalledTimes(0);
+        expect(dynamicFilesLoaderMock.getFromSecond).toHaveBeenCalledTimes(0);
+        expect(date.getTime()).toBe((new Date('2021/03/19')).getTime())
 
     })
 
     it('Check parsers does not match', async () => {
-        const date = await rangeService.getByPoint('testThird', 'adobe', 'changelog-generator');
+        const date = await rangeService.getByPoint('testThird', 'from', 'adobe', 'changelog-generator');
         expect(dynamicFilesLoaderMock.getRegExpFirst).toHaveBeenCalledTimes(1);
         expect(dynamicFilesLoaderMock.getRegExpSecond).toHaveBeenCalledTimes(1);
-        expect(dynamicFilesLoaderMock.getDateFirst).toHaveBeenCalledTimes(0);
-        expect(dynamicFilesLoaderMock.getDateSecond).toHaveBeenCalledTimes(0);
+        expect(dynamicFilesLoaderMock.getFromFirst).toHaveBeenCalledTimes(0);
+        expect(dynamicFilesLoaderMock.getFromSecond).toHaveBeenCalledTimes(0);
+        expect(dynamicFilesLoaderMock.getToFirst).toHaveBeenCalledTimes(0);
+        expect(dynamicFilesLoaderMock.getToSecond).toHaveBeenCalledTimes(0);
         expect(date).toBeFalsy()
     })
 })
@@ -120,7 +128,7 @@ describe('GetVersions', () => {
                 to: new Date('2021/03/19')
             },
             '1.0.9': {
-                from: new Date('2021/03/19'),
+                from: new Date('2021-03-19T05:00:00.001Z'),
                 to: new Date('2021/03/21')
             }
         })
@@ -135,7 +143,7 @@ describe('GetVersions', () => {
             '1.0.9'
         );
 
-        expect(githubService.getAllTagsMock).toHaveBeenCalledTimes(1);
+        expect(githubService.getAllTagsMock).toHaveBeenCalledTimes(0);
         expect(versions).toStrictEqual({
             '1.0.1': {
                 from: new Date('2020/03/28'),
@@ -152,10 +160,6 @@ describe('GetVersions', () => {
             '1.0.4': {
                 from: new Date('2021/02/12'),
                 to: new Date('2021/03/19')
-            },
-            '1.0.9': {
-                from: new Date('2021/03/19'),
-                to: new Date('2021/03/21')
             }
         })
     });
@@ -169,7 +173,7 @@ describe('GetVersions', () => {
             '1.0.9'
         );
 
-        expect(githubService.getAllTagsMock).toHaveBeenCalledTimes(1);
+        expect(githubService.getAllTagsMock).toHaveBeenCalledTimes(0);
         expect(versions).toStrictEqual({
             '1.0.1': {
                 from: new Date('2020/03/28'),
@@ -199,7 +203,7 @@ describe('GetVersions', () => {
             '1.0.9'
         );
 
-        expect(githubService.getAllTagsMock).toHaveBeenCalledTimes(1);
+        expect(githubService.getAllTagsMock).toHaveBeenCalledTimes(0);
         expect(versions).toStrictEqual({
             '1.0.3': {
                 from: new Date('2020/10/18'),

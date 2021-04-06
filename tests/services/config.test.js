@@ -66,9 +66,10 @@ describe('ParseReleaseLine', () => {
         const parsed = configService.parseReleaseLine('2.3.4..2.4.1:regExp');
         expect(parsed.from).toBeTruthy();
         expect(parsed.to).toBeTruthy();
-        expect(parsed.version).toBeFalsy();
+        expect(parsed.version).toBeTruthy();
         expect(parsed.filter).toBeTruthy();
         expect(parsed.from).toBe('2.3.4');
+        expect(parsed.version).toBe('patch');
         expect(parsed.to).toBe('2.4.1');
         expect(parsed.filter).toBe('regExp');
     })
@@ -76,8 +77,9 @@ describe('ParseReleaseLine', () => {
         const parsed = configService.parseReleaseLine('2.3.4..2.4.1@:regExp');
         expect(parsed.from).toBeTruthy();
         expect(parsed.to).toBeTruthy();
-        expect(parsed.version).toBeFalsy();
+        expect(parsed.version).toBeTruthy();
         expect(parsed.filter).toBeTruthy();
+        expect(parsed.version).toBe('patch');
         expect(parsed.from).toBe('2.3.4');
         expect(parsed.to).toBe('2.4.1');
         expect(parsed.filter).toBe('regExp');
@@ -86,8 +88,9 @@ describe('ParseReleaseLine', () => {
         const parsed = configService.parseReleaseLine('2.3.4..2.4.1');
         expect(parsed.from).toBeTruthy();
         expect(parsed.to).toBeTruthy();
-        expect(parsed.version).toBeFalsy();
+        expect(parsed.version).toBeTruthy();
         expect(parsed.filter).toBeFalsy();
+        expect(parsed.version).toBe('patch');
         expect(parsed.from).toBe('2.3.4');
         expect(parsed.to).toBe('2.4.1');
     })
@@ -95,53 +98,63 @@ describe('ParseReleaseLine', () => {
         const parsed = configService.parseReleaseLine('2.3.4..2.4.1@:');
         expect(parsed.from).toBeTruthy();
         expect(parsed.to).toBeTruthy();
-        expect(parsed.version).toBeFalsy();
+        expect(parsed.version).toBeTruthy();
         expect(parsed.filter).toBeFalsy();
+        expect(parsed.version).toBe('patch');
         expect(parsed.from).toBe('2.3.4');
         expect(parsed.to).toBe('2.4.1');
     })
     it('Check successful without "to" with separator', () => {
         const parsed = configService.parseReleaseLine('2.3.4..@2.4.2:regExp');
         expect(parsed.from).toBeTruthy();
-        expect(parsed.to).toBeFalsy();
+        expect(parsed.to).toBeTruthy();
         expect(parsed.version).toBeTruthy();
         expect(parsed.filter).toBeTruthy();
         expect(parsed.from).toBe('2.3.4');
+        expect(parsed.to).toBe('now');
         expect(parsed.version).toBe('2.4.2');
         expect(parsed.filter).toBe('regExp');
     })
     it('Check successful without "to"', () => {
         const parsed = configService.parseReleaseLine('2.3.4@2.4.2:regExp');
         expect(parsed.from).toBeTruthy();
-        expect(parsed.to).toBeFalsy();
+        expect(parsed.to).toBeTruthy();
         expect(parsed.version).toBeTruthy();
         expect(parsed.filter).toBeTruthy();
         expect(parsed.from).toBe('2.3.4');
+        expect(parsed.to).toBe('now');
         expect(parsed.version).toBe('2.4.2');
         expect(parsed.filter).toBe('regExp');
     })
     it('Check successful without "from"', () => {
         const parsed = configService.parseReleaseLine('..2.3.4@2.4.2:regExp');
-        expect(parsed.from).toBeFalsy();
+        expect(parsed.from).toBeTruthy();
         expect(parsed.to).toBeTruthy();
         expect(parsed.version).toBeTruthy();
         expect(parsed.filter).toBeTruthy();
+        expect(parsed.from).toBe('start');
         expect(parsed.to).toBe('2.3.4');
         expect(parsed.version).toBe('2.4.2');
         expect(parsed.filter).toBe('regExp');
     })
     it('Check empty string with separators', () => {
         const parsed = configService.parseReleaseLine('..@:');
-        expect(parsed.from).toBeFalsy();
-        expect(parsed.to).toBeFalsy();
-        expect(parsed.version).toBeFalsy();
+        expect(parsed.from).toBeTruthy();
+        expect(parsed.to).toBeTruthy();
+        expect(parsed.version).toBeTruthy();
+        expect(parsed.version).toBe('patch');
+        expect(parsed.from).toBe('start');
+        expect(parsed.to).toBe('now');
         expect(parsed.filter).toBeFalsy();
     })
     it('Check empty string', () => {
         const parsed = configService.parseReleaseLine('..@:');
-        expect(parsed.from).toBeFalsy();
-        expect(parsed.to).toBeFalsy();
-        expect(parsed.version).toBeFalsy();
+        expect(parsed.from).toBeTruthy();
+        expect(parsed.from).toBe('start');
+        expect(parsed.to).toBeTruthy();
+        expect(parsed.to).toBe('now');
+        expect(parsed.version).toBeTruthy();
+        expect(parsed.version).toBe('patch');
         expect(parsed.filter).toBeFalsy();
     })
 })

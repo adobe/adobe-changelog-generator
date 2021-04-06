@@ -9,8 +9,9 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import type { LoaderInterface } from './api/loader-interface';
-import type { FilterInterface } from './api/filter-interface';
+import type {LoaderInterface} from './api/loader-interface';
+import type {FilterInterface} from './api/filter-interface';
+
 const aioConfig = require('@adobe/aio-lib-core-config');
 const _ = require('lodash');
 const GithubService = require('./services/github');
@@ -52,12 +53,12 @@ class Index {
      * @return {Promise<void>}
      */
     async generate(namespaceNames?:Array<string>) {
-    	const configLocal = await this.configService.getLocal(this.configPath, this.configPathType);
-    	const namespaceNamesList = namespaceNames && namespaceNames.length ?
-    		namespaceNames : this.namespaceService.getNames(configLocal);
-    	for await (const namespaceName of namespaceNamesList) {
-    		await this.generateNamespace(namespaceName, configLocal[namespaceName]);
-    	}
+        const configLocal = await this.configService.getLocal(this.configPath, this.configPathType);
+        const namespaceNamesList = namespaceNames && namespaceNames.length ?
+            namespaceNames : this.namespaceService.getNames(configLocal);
+        for await (const namespaceName of namespaceNamesList) {
+            await this.generateNamespace(namespaceName, configLocal[namespaceName]);
+        }
     }
 
     /**
@@ -68,31 +69,30 @@ class Index {
      * @return {Promise<void>}
      */
     async generateNamespace(namespaceName:string, configLocal:Object) {
-    	const { releaseLine, combine, ...configOptions } = _.merge(
-    		await this.configService.getRemote(namespaceName),
-    		configLocal
-    	);
+        const {releaseLine, combine, ...configOptions} = _.merge(
+            await this.configService.getRemote(namespaceName),
+            configLocal
+        );
+        const sharedConfig = new Config(configOptions);
+        const loader:LoaderInterface = await this.getLoader(sharedConfig);
+        const groupBy = await this.getGroup(sharedConfig);
+        const filters = await this.getFilters(sharedConfig);
+        const template = templateManager.get(sharedConfig.getTemplate());
+        const data = await asyncService.mapValuesAsync(
+            {[namespaceName]: releaseLine, ...combine},
+            (releaseLine, namespaceName) => this.getData(
+                namespaceName,
+                releaseLine,
+                loader,
+                groupBy,
+                filters
+            )
+        );
 
-    	const sharedConfig = new Config(configOptions);
-    	const loader:LoaderInterface = await this.getLoader(sharedConfig);
-    	const groupBy = await this.getGroup(sharedConfig);
-    	const filters = await this.getFilters(sharedConfig);
-    	const template = templateManager.get(sharedConfig.getTemplate());
-    	const data = await asyncService.mapValuesAsync(
-    		{[namespaceName]: releaseLine, ...combine},
-    		(releaseLine, namespaceName) => this.getData(
-    			namespaceName,
-    			releaseLine,
-    			loader,
-    			groupBy,
-    			filters
-    		)
-    	);
-
-    	fileService.create(
-    		`${sharedConfig.getProjectPath()}/${sharedConfig.getFilename()}`,
-    		template(data)
-    	);
+        fileService.create(
+            `${sharedConfig.getProjectPath()}/${sharedConfig.getFilename()}`,
+            template(data)
+        );
     }
 
     /**
@@ -106,41 +106,48 @@ class Index {
      * @return {Promise<Object>}
      */
     async getData(
-    	namespaceName:string,
-    	releaseLine:string,
-    	loader:LoaderInterface,
-    	groupBy?:Object,
-    	filters?:Array<FilterInterface>
+        namespaceName:string,
+        releaseLine:string,
+        loader:LoaderInterface,
+        groupBy?:Object,
+        filters?:Array<FilterInterface>
     ):Array<Object> {
-    	const parsedNamespace = this.configService.parseNamespace(namespaceName);
-    	const parsedReleaseLine = this.configService.parseReleaseLine(releaseLine);
-    	const timeRange = await this.rangeService.getRange(
-    		parsedNamespace.organization,
-    		parsedNamespace.repository,
-    		parsedReleaseLine.from,
-    		parsedReleaseLine.to,
-    	);
+        const parsedNamespace = this.configService.parseNamespace(namespaceName);
+        const parsedReleaseLine = this.configService.parseReleaseLine(releaseLine);
+        const timeRange = await this.rangeService.getRange(
+            parsedNamespace.organization,
+            parsedNamespace.repository,
+            parsedReleaseLine.from,
+            parsedReleaseLine.to,
+            parsedReleaseLine.filter
+        );
 
-    	const versionsRange = await this.rangeService.getVersions(
-    		parsedNamespace.organization,
-    		parsedNamespace.repository,
-    		timeRange.from,
-    		timeRange.to,
-    		parsedReleaseLine.filter,
-    		parsedReleaseLine.version
-    	);
+        const versionsRange = await this.rangeService.getVersions(
+            parsedNamespace.organization,
+            parsedNamespace.repository,
+            timeRange.from,
+            timeRange.to,
+            parsedReleaseLine.filter,
+            parsedReleaseLine.version
+        );
 
-    	let data = await loader.execute(
-    		parsedNamespace.organization,
-    		parsedNamespace.repository,
-    		timeRange.from,
-    		timeRange.to
-    	);
+        let data = await loader.execute(
+            parsedNamespace.organization,
+            parsedNamespace.repository,
+            parsedNamespace.branch,
+            timeRange.from,
+            timeRange.to
+        );
 
-    	if (filters && filters.length) { data = await this.applyFilters(data, filters); }
-    	if (groupBy) { data = await this.applyGrouping(data, [groupBy]); }
+        if (filters && filters.length) {
+            data = await this.applyFilters(data, filters);
+        }
 
-    	return  this.getDataToVersionsMapping(data, versionsRange);
+        if (groupBy) {
+            data = await this.applyGrouping(data, [groupBy]);
+        }
+
+        return this.getDataToVersionsMapping(data, versionsRange);
     }
 
     /**
@@ -151,18 +158,22 @@ class Index {
      * @return {Object} Mapped data to version object
      */
     getDataToVersionsMapping(data:Array<Object>, versionsRange:Object):Object {
-    	data.forEach((item:Object) => {
-    		const version = _.findKey(versionsRange, (versionRange:Object, versionName:string) => {
-    			const createdAtTimestamp = (new Date(item.createdAt)).getTime();
-    			const fromTimestamp = (new Date(versionRange.from)).getTime();
-    			const toTimestamp = (new Date(versionRange.to)).getTime();
-    			return createdAtTimestamp > fromTimestamp && createdAtTimestamp < toTimestamp;
-    		});
-    		if (!versionsRange[version].data) { versionsRange[version].data = []; }
-    		versionsRange[version].data.push(item);
-    	});
+        data.forEach((item:Object) => {
+            const version = _.findKey(versionsRange, (versionRange:Object, versionName:string) => {
+                const createdAtTimestamp = (new Date(item.mergedAt)).getTime();
+                const fromTimestamp = (new Date(versionRange.from)).getTime();
+                const toTimestamp = (new Date(versionRange.to)).getTime();
+                const res = createdAtTimestamp > fromTimestamp && createdAtTimestamp < toTimestamp;
+                return createdAtTimestamp > fromTimestamp && createdAtTimestamp < toTimestamp;
+            });
 
-    	return versionsRange;
+            if (!versionsRange[version].data) {
+                versionsRange[version].data = [];
+            }
+            versionsRange[version].data.push(item);
+        });
+
+        return versionsRange;
     }
 
     /**
@@ -171,10 +182,10 @@ class Index {
      * @param {Object} sharedConfig - config that contains same values for main and related namespaces
      * @return {Promise<Object|null>}
      */
-    async getGroup (sharedConfig:Object) {
-    	const Group = groupManager.get(sharedConfig.getGroupName());
-    	return sharedConfig.getGroupName() ?
-    		new Group(sharedConfig.getGroupConfig()) : null;
+    async getGroup(sharedConfig:Object) {
+        const Group = groupManager.get(sharedConfig.getGroupName());
+        return sharedConfig.getGroupName() ?
+            new Group(sharedConfig.getGroupConfig()) : null;
     }
 
     /**
@@ -184,8 +195,8 @@ class Index {
      * @return {Promise<Object>}
      */
     async getLoader(sharedConfig:Object) {
-    	const Loader = await loaderManager.get(sharedConfig.getLoaderName());
-    	return new Loader(this.githubService);
+        const Loader = await loaderManager.get(sharedConfig.getLoaderName());
+        return new Loader(this.githubService);
     }
 
     /**
@@ -195,9 +206,9 @@ class Index {
      * @return {Promise<Object>}
      */
     async getFilters(sharedConfig:Object) {
-    	const filterNames:Array<string> = sharedConfig.getFilterNames();
-    	const filterClasses:Object = filterManager.get(filterNames);
-    	return filterNames.map((name:string) => new filterClasses[name](sharedConfig.getFilter(name)));
+        const filterNames:Array<string> = sharedConfig.getFilterNames();
+        const filterClasses:Object = filterManager.get(filterNames);
+        return filterNames.map((name:string) => new filterClasses[name](sharedConfig.getFilter(name)));
     }
 
     /**
@@ -208,10 +219,10 @@ class Index {
      * @return {Promise<Array<Object>>} - grouped data
      */
     async applyGrouping(data:Array<Object>, groupBy:Array<Object>) {
-    	for (const group of groupBy) {
-    		data = group.execute(data);
-    	}
-    	return data;
+        for (const group of groupBy) {
+            data = group.execute(data);
+        }
+        return data;
     }
 
     /**
@@ -222,10 +233,10 @@ class Index {
      * @return {Promise<Array<Object>>} - filtered data
      */
     async applyFilters(data:Array<Object>, filters:Array<Object>) {
-    	for (const filter of filters) {
-    		data = filter.execute(data);
-    	}
-    	return data;
+        for (const filter of filters) {
+            data = filter.execute(data);
+        }
+        return data;
     }
 }
 

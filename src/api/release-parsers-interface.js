@@ -15,22 +15,24 @@ export interface ReleaseParsersInterface {
     /**
      * @param githubClient
      */
-    constructor(githubClient:Octokit):void;
+    constructor(githubClient:Octokit): void;
 
     /**
      * Returns sort order
      */
-    getSortOrder():number;
+    getSortOrder(): number;
 
     /**
      * Returns regexp to parse release
      */
-    getRegExp():RegExp;
+    getRegExp(): RegExp;
 
     /**
      * @param org
      * @param repo
      * @param point
+     * @param filter
      */
-    getDate(org:string, repo:string, point:string):Promise<Date>;
+    getFromDate(org:string, repo:string, point:string, filter:?RegExp): Promise<Date>;
+    getToDate(org:string, repo:string, point:string, filter:?RegExp): Promise<Date>;
 }

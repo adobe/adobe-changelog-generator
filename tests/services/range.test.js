@@ -2,6 +2,7 @@ const RangeService = require('../../src/services/range');
 const githubService = require('../mocks/github-service');
 const DynamicFilesLoader = require('../../src/services/dynamic-files-loader');
 const dynamicFilesLoaderMock = require('../mocks/dynamic-files-loader');
+const addMilliseconds = require('date-fns/addMilliseconds');
 jest.mock('../../src/services/dynamic-files-loader', () => jest.fn());
 DynamicFilesLoader.mockImplementation(() => ({getAll: dynamicFilesLoaderMock.getAllMock}));
 const rangeService = new RangeService(githubService.githubServiceMock);
@@ -125,10 +126,10 @@ describe('GetVersions', () => {
             },
             '1.0.4': {
                 from: new Date('2021/02/12'),
-                to: new Date('2021-03-19T05:00:00.000Z')
+                to: new Date('2021/03/19')
             },
             '1.0.9': {
-                from: new Date('2021-03-19T05:00:00.001Z'),
+                from: addMilliseconds(new Date('2021/03/19'), 1),
                 to: new Date('2021/03/21')
             }
         })

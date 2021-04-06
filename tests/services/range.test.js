@@ -125,7 +125,7 @@ describe('GetVersions', () => {
             },
             '1.0.4': {
                 from: new Date('2021/02/12'),
-                to: new Date('2021/03/19')
+                to: new Date('2021-03-19T05:00:00.000Z')
             },
             '1.0.9': {
                 from: new Date('2021-03-19T05:00:00.001Z'),

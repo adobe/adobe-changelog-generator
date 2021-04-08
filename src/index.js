@@ -54,8 +54,7 @@ class Index {
             const config = new Config(configOptions);
             const data = await this.changelogDataGenerator(namespaceName, config);
 
-            // TODO: remove hardcode
-            changelogWriterRegistry.get('file').write(data, config);
+            changelogWriterRegistry.get(config.getOutputFormat()).write(data, config);
         }
     }
 }

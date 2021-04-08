@@ -14,7 +14,7 @@ import type { ChangelogWriterInterface } from '../api/changelog-writer-interface
 const fileService = require('./services/file');
 const templateManager = require('./template-manager');
 
-class File implements ChangelogWriterInterface {
+class Md implements ChangelogWriterInterface {
     /**
      * Write changelog data to file
      *
@@ -31,4 +31,4 @@ class File implements ChangelogWriterInterface {
     }
 }
 
-module.exports = File;
+module.exports = Md;

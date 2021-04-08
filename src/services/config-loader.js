@@ -12,7 +12,7 @@ governing permissions and limitations under the License.
 const fileLoader = require('./file');
 const aioConfig = require('@adobe/aio-lib-core-config');
 const GithubService = require('./github');
-const GithubNamespaceParser = require("./services/github-namespace-parser");
+const GithubNamespaceParser = require("./github-namespace-parser");
 
 class ConfigLoader {
     aioConfig:Object

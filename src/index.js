@@ -11,9 +11,8 @@ governing permissions and limitations under the License.
 
 const _ = require('lodash');
 const ConfigLoader = require('./services/config-loader');
-const fileService = require('./services/file');
 const ChangelogDataGenerator = require("./services/changelog-data-generator");
-const templateManager = require('./template-manager');
+const changelogWriterRegistry = require('./services/changelog-writer-registry');
 
 class Index {
     configLoader:Object
@@ -52,11 +51,8 @@ class Index {
             const config = new Config(configOptions);
             const data = await this.changelogDataGenerator(namespaceName, config);
 
-            const template = templateManager.get(config.getTemplate());
-            fileService.create(
-                `${config.getProjectPath()}/${config.getFilename()}`,
-                template(data)
-            );
+            // TODO: remove hardcode
+            changelogWriterRegistry.get('file').write(data, config);
         }
     }
 }

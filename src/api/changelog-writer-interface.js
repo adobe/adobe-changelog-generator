@@ -9,25 +9,15 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const registry = {};
-const GroupRegistry = {
+export interface ChangelogWriterInterface {
     /**
-     * Loads group by name
+     * Write output based on changelog data
      *
-     * @param name
-     * @param config
-     * @return {Promise<Object|null>}
+     * @param changelogData
+     * @param {Object} config
      */
-    get: (name:string, config:Object):Function => {
-        if (!name) {
-            return null;
-        }
-        name = name.toLowerCase();
-        if (!registry[name]) {
-            registry[name] = require(`../groups/${name}.js`);
-        }
-        return new registry[name](config);
-    }
-};
-
-module.exports = GroupRegistry;
+    generate(
+        changelogData:Array<string>,
+        config:Object
+    ):void
+}

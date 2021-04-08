@@ -9,15 +9,24 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-export interface ChangelogDataWriterInterface {
+const registry = {};
+const ChangelogWriterRegistry = {
     /**
-     * Generate output based on changelog data
+     * Loads changelog writer by name
      *
-     * @param outputType
-     * @param changelogData
+     * @param name
+     * @return {Promise<Object|null>}
      */
-    generate(
-        outputType:string,
-        changelogData:Array
-    ):void
-}
+    get: (name:string):Function => {
+        if (!name) {
+            return null;
+        }
+        name = name.toLowerCase();
+        if (!registry[name]) {
+            registry[name] = require(`../writers/${name}.js`);
+        }
+        return new registry[name]();
+    }
+};
+
+module.exports = ChangelogWriterRegistry;

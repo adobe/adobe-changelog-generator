@@ -16,8 +16,8 @@ class GithubNamespaceParser {
      * @param {string} namespace
      * @return {{organization: string, repository: string, branch: string}} | Error
      */
-    parse(namespace: string): Object | Error {
-        const parsed: Array<string> = namespace.match(/(.*)\/(.*):(.*)/) || [];
+    parse(namespace:string):Object | Error {
+        const parsed:Array<string> = namespace.match(/(.*)\/(.*):(.*)/) || [];
 
         if (!parsed[1] || !parsed[2] || !parsed[3]) {
             throw new Error(`

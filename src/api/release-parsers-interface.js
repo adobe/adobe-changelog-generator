@@ -9,14 +9,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const Octokit = require('@octokit/rest').Octokit;
-
 export interface ReleaseParsersInterface {
-    /**
-     * @param githubClient
-     */
-    constructor(githubClient:Octokit): void;
-
     /**
      * Returns sort order
      */

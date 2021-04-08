@@ -9,8 +9,8 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import type { LoaderInterface } from './api/loader-interface';
-import type { FilterInterface } from './api/filter-interface';
+import type {LoaderInterface} from './api/loader-interface';
+import type {FilterInterface} from './api/filter-interface';
 const _ = require('lodash');
 const GithubService = require('./services/github');
 const asyncService = require('./services/async');
@@ -33,12 +33,12 @@ class ChangelogDataGenerator {
      * @param {string} configPathType - Type of the path (Absolute|Relative)
      */
     constructor (token:string, configPath?:string, configPathType?:string) {
-    	this.githubService = new GithubService(token);
-    	this.rangeService = new RangeService(this.githubService);
-    	this.configPath = configPath;
-    	this.configPathType = configPathType;
-    	this.githubNamespaceParser = new GithubNamespaceParser();
-    	this.changelogGenerationTermsParser = new ChangelogGenerationTermsParser();
+        this.githubService = new GithubService(token);
+        this.rangeService = new RangeService(this.githubService);
+        this.configPath = configPath;
+        this.configPathType = configPathType;
+        this.githubNamespaceParser = new GithubNamespaceParser();
+        this.changelogGenerationTermsParser = new ChangelogGenerationTermsParser();
     }
 
     /**
@@ -49,68 +49,72 @@ class ChangelogDataGenerator {
      * @return {Object}
      */
     async getChangelogData(namespaceName:string, config:Object) {
-    	const loader:LoaderInterface = await this.getLoader(config);
-    	const groupBy = await this.getGroup(config);
-    	const filters = await this.getFilters(config);
-    	const data = await asyncService.mapValuesAsync(
-    		{[namespaceName]: releaseLine, ...combine},
-    		(releaseLine, namespaceName) => this.collectData(
-    			namespaceName,
-    			releaseLine,
-    			loader,
-    			groupBy,
-    			filters
-    		)
-    	);
-    	return data;
+        const loader:LoaderInterface = await this.getLoader(config);
+        const groupBy = await this.getGroup(config);
+        const filters = await this.getFilters(config);
+        return await asyncService.mapValuesAsync(
+            {[namespaceName]: releaseLine, ...combine},
+            (releaseLine, namespaceName) => this.collectData(
+                namespaceName,
+                releaseLine,
+                loader,
+                groupBy,
+                filters
+            )
+        );
     }
 
     /**
      * Collect data for namespace
      *
      * @param {string} namespaceName - namespace name
-     * @param {string} releaseLine - release line field from configuration. Pattern: <type>..<type>@<version>:<regexp>
+     * @param {string} termsLine - release line field from configuration. Pattern: <type>..<type>@<version>:<regexp>
      * @param {Object} loader - Data loader
      * @param {Object|null} groupBy - Groups data
      * @param {Array<Object>|null} filters - Filters data
      * @return {Promise<Object>}
      */
     async collectData(
-    	namespaceName:string,
-    	releaseLine:string,
-    	loader:LoaderInterface,
-    	groupBy?:Object,
-    	filters?:Array<FilterInterface>
+        namespaceName:string,
+        termsLine:string,
+        loader:LoaderInterface,
+        groupBy?:Object,
+        filters?:Array<FilterInterface>
     ):Array<Object> {
-    	const namespace = this.githubNamespaceParser.parse(namespaceName);
-    	const changelogGenerationTerms = this.changelogGenerationTermsParser.parse(releaseLine);
-    	const timeRange = await this.rangeService.getRange(
+        const namespace = this.githubNamespaceParser.parse(namespaceName);
+        const changelogGenerationTerms = this.changelogGenerationTermsParser.parse(termsLine);
+        const timeRange = await this.rangeService.getRange(
             namespace.organization,
             namespace.repository,
             changelogGenerationTerms.from,
             changelogGenerationTerms.to,
-    	);
+            changelogGenerationTerms.filter
+        );
 
-    	const versionsRange = await this.rangeService.getVersions(
+        const versionsRange = await this.rangeService.getVersions(
             namespace.organization,
             namespace.repository,
-    		timeRange.from,
-    		timeRange.to,
+            timeRange.from,
+            timeRange.to,
             changelogGenerationTerms.filter,
             changelogGenerationTerms.version
-    	);
+        );
 
-    	let data = await loader.execute(
+        let data = await loader.execute(
             namespace.organization,
             namespace.repository,
-    		timeRange.from,
-    		timeRange.to
-    	);
+            timeRange.from,
+            timeRange.to
+        );
 
-    	if (filters && filters.length) { data = await this.applyFilters(data, filters); }
-    	if (groupBy) { data = await this.applyGrouping(data, [groupBy]); }
+        if (filters && filters.length) {
+            data = await this.applyFilters(data, filters);
+        }
+        if (groupBy) {
+            data = await this.applyGrouping(data, [groupBy]);
+        }
 
-    	return  this.mapDataToVersionsMapping(data, versionsRange);
+        return this.mapDataToVersionsMapping(data, versionsRange);
     }
 
     /**
@@ -121,18 +125,21 @@ class ChangelogDataGenerator {
      * @return {Object} Mapped data to version object
      */
     mapDataToVersionsMapping(data:Array<Object>, versionsRange:Object):Object {
-    	data.forEach((item:Object) => {
-    		const version = _.findKey(versionsRange, (versionRange:Object, versionName:string) => {
-    			const createdAtTimestamp = (new Date(item.createdAt)).getTime();
-    			const fromTimestamp = (new Date(versionRange.from)).getTime();
-    			const toTimestamp = (new Date(versionRange.to)).getTime();
-    			return createdAtTimestamp > fromTimestamp && createdAtTimestamp < toTimestamp;
-    		});
-    		if (!versionsRange[version].data) { versionsRange[version].data = []; }
-    		versionsRange[version].data.push(item);
-    	});
+        data.forEach((item:Object) => {
+            const version = _.findKey(versionsRange, (versionRange:Object, versionName:string) => {
+                const mergedAtTimestamp = (new Date(item.mergedAt)).getTime();
+                const fromTimestamp = (new Date(versionRange.from)).getTime();
+                const toTimestamp = (new Date(versionRange.to)).getTime();
+                const res = mergedAtTimestamp > fromTimestamp && mergedAtTimestamp < toTimestamp;
+                return mergedAtTimestamp > fromTimestamp && mergedAtTimestamp < toTimestamp;
+            });
+            if (!versionsRange[version].data) {
+                versionsRange[version].data = [];
+            }
+            versionsRange[version].data.push(item);
+        });
 
-    	return versionsRange;
+        return versionsRange;
     }
 
     /**
@@ -178,10 +185,10 @@ class ChangelogDataGenerator {
      * @return {Promise<Array<Object>>} - grouped data
      */
     async applyGrouping(data:Array<Object>, groupBy:Array<Object>) {
-    	for (const group of groupBy) {
-    		data = group.execute(data);
-    	}
-    	return data;
+        for (const group of groupBy) {
+            data = group.execute(data);
+        }
+        return data;
     }
 
     /**
@@ -192,10 +199,10 @@ class ChangelogDataGenerator {
      * @return {Promise<Array<Object>>} - filtered data
      */
     async applyFilters(data:Array<Object>, filters:Array<Object>) {
-    	for (const filter of filters) {
-    		data = filter.execute(data);
-    	}
-    	return data;
+        for (const filter of filters) {
+            data = filter.execute(data);
+        }
+        return data;
     }
 }
 

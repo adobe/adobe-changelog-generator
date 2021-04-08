@@ -9,7 +9,8 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-// TODO: interface "must have"
+const specialWords = require('../models/special-words');
+
 class ChangelogGenerationTermsParser {
     /**
      * Parses changelog generation terms. Example: <type>..<type>@<version>:<regexp>
@@ -17,13 +18,18 @@ class ChangelogGenerationTermsParser {
      * @param {string} terms
      * @return {{filter: string, from: string, to: string, version: string}}
      */
-    parse(terms: string): Object | Error {
+    parse(terms:string):Object | Error {
         let match, filter, version, from, to;
         [match, filter] = terms.split(':');
         [match, version] = match.split('@');
         [from, to] = match.split('..');
 
-        return {from, to, version, filter};
+        return {
+            from: from || specialWords.start,
+            to: to || specialWords.now,
+            version: version || 'patch',
+            filter
+        };
     }
 }
 

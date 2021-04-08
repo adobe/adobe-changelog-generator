@@ -9,15 +9,15 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-export interface ChangelogDataProcessorInterface {
+export interface ChangelogDataWriterInterface {
     /**
      * Generate output based on changelog data
      *
-     * @param string changelogData
+     * @param outputType
      * @param changelogData
      */
     generate(
-        outputType:string
-        changelogData:Array,
+        outputType:string,
+        changelogData:Array
     ):void
 }

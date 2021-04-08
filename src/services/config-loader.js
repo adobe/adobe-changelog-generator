@@ -16,16 +16,16 @@ const GithubNamespaceParser = require("./services/github-namespace-parser");
 
 class ConfigLoader {
     aioConfig:Object
-    githubRestClient:Object,
+    githubRestClient:Object
     githubNamespaceParser:Object
 
     /**
-     * @param {githubToken} token - Github access token
+     * @param {githubToken} githubToken - Github access token
      */
-    constructor (string: githubToken) {
+    constructor (string:githubToken) {
         const githubService = new GithubService(githubToken);
-  	    this.githubRestClient = githubService.getRestClient();
-  	    this.aioConfig = aioConfig;
+        this.githubRestClient = githubService.getRestClient();
+        this.aioConfig = aioConfig; // TODO: extract aio
         this.githubNamespaceParser = new GithubNamespaceParser();
     }
 
@@ -37,16 +37,18 @@ class ConfigLoader {
      * @return {Promise<Object|null>}
      */
     async getRepositoryConfig (namespaceName:string, configPath:string = '/.github/changelog.json'):Object {
-  	const { organization, repository, branch } = this.githubNamespaceParser.parse(namespaceName);
-  	const response = await this.githubRestClient.repos.getContent({
-  		owner: organization,
-  		path: configPath,
-  		repo: repository,
-  		ref: branch || 'master'
-  	}).then((res) => res.data || {}).catch(() => {});
-  	return response
-  		? JSON.parse(Buffer.from(response.content, 'base64').toString('binary'))
-  		: null;
+        const {organization, repository, branch} = this.githubNamespaceParser.parse(namespaceName);
+        const response = await this.githubRestClient.repos.getContent({
+            owner: organization,
+            path: configPath,
+            repo: repository,
+            ref: branch || 'master'
+        })
+            .then((res) => res.data || {})
+            .catch(() => {});
+        return response
+            ? JSON.parse(Buffer.from(response.content, 'base64').toString('binary'))
+            : null;
     }
 
     /**

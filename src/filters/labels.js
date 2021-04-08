@@ -10,7 +10,7 @@ governing permissions and limitations under the License.
 */
 
 import type { FilterInterface } from '../api/filter-interface.js';
-import type { PullRequestData } from '../api/data/pullrequest.js';
+import type { PullRequestData } from '../models/pullrequest.js';
 
 class LabelsFilter implements FilterInterface {
     labels:Array<string>

@@ -9,10 +9,8 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import type { FileManagerInterface } from './api/file-manager-interface.js';
-
 const templates = {};
-const TemplateManager:FileManagerInterface = {
+const TemplateManager = {
     /**
      * Loads template from templates folder by name
      * @param name

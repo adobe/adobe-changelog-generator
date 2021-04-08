@@ -10,7 +10,7 @@ governing permissions and limitations under the License.
 */
 
 import type { LoaderInterface } from '../api/loader-interface.js';
-import type { PullRequestData } from '../api/data/pullrequest.js';
+import type { PullRequestData } from '../models/pullrequest.js';
 import type { graphql } from '@octokit/graphql';
 
 class PullRequestLoader implements LoaderInterface {

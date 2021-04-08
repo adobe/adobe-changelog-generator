@@ -9,14 +9,14 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import type {LoaderInterface} from './api/loader-interface';
-import type {FilterInterface} from './api/filter-interface';
+import type {LoaderInterface} from '../api/loader-interface';
+import type {FilterInterface} from '../api/filter-interface';
 const _ = require('lodash');
 const GithubService = require('./services/github');
 const asyncService = require('./services/async');
-const loaderManager = require('./loader-manager');
+const groupRegistry = require('./services/group-registry');
+const loaderRegistry = require('./services/loader-registry');
 const filterManager = require('./filter-manager');
-const groupRegistry = require('./groups/registry');
 const RangeService = require("./services/range");
 const GithubNamespaceParser = require("./services/github-namespace-parser");
 const ChangelogGenerationTermsParser = require("./services/changelog-generation-terms-parser");
@@ -28,15 +28,11 @@ class ChangelogDataGenerator {
     changelogGenerationTermsParser:Object
 
     /**
-     * @param {string} token - Github access token
-     * @param {string} configPath - Path to config location
-     * @param {string} configPathType - Type of the path (Absolute|Relative)
+     * @param {string} githubToken - Github access token
      */
-    constructor (token:string, configPath?:string, configPathType?:string) {
-        this.githubService = new GithubService(token);
+    constructor (githubToken:string) {
+        this.githubService = new GithubService(githubToken);
         this.rangeService = new RangeService(this.githubService);
-        this.configPath = configPath;
-        this.configPathType = configPathType;
         this.githubNamespaceParser = new GithubNamespaceParser();
         this.changelogGenerationTermsParser = new ChangelogGenerationTermsParser();
     }
@@ -49,8 +45,8 @@ class ChangelogDataGenerator {
      * @return {Object}
      */
     async getChangelogData(namespaceName:string, config:Object) {
-        const loader:LoaderInterface = await this.getLoader(config);
-        const groupBy = await this.getGroup(config);
+        const loader:LoaderInterface = await loaderRegistry.get(config.getLoaderName(), this.githubService);
+        const groupBy = await groupRegistry.get(config.getGroupName(), config.getGroupConfig());
         const filters = await this.getFilters(config);
         return await asyncService.mapValuesAsync(
             {[namespaceName]: releaseLine, ...combine},
@@ -140,29 +136,6 @@ class ChangelogDataGenerator {
         });
 
         return versionsRange;
-    }
-
-    /**
-     * Loaded and instantiate corresponded Group class based on configuration
-     *
-     * @param {Object} sharedConfig - config that contains same values for main and related namespaces
-     * @return {Promise<Object|null>}
-     */
-    async getGroup (sharedConfig:Object) {
-    	const Group = groupRegistry.get(sharedConfig.getGroupName());
-    	return sharedConfig.getGroupName() ?
-    		new Group(sharedConfig.getGroupConfig()) : null;
-    }
-
-    /**
-     * Loaded and instantiate corresponded Loader class based on configuration
-     *
-     * @param {Object} sharedConfig - config that contains same values for main and related namespaces
-     * @return {Promise<Object>}
-     */
-    async getLoader(sharedConfig:Object) {
-    	const Loader = await loaderManager.get(sharedConfig.getLoaderName());
-    	return new Loader(this.githubService);
     }
 
     /**

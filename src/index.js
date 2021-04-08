@@ -9,7 +9,6 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-
 const _ = require('lodash');
 const ConfigLoader = require('./services/config-loader');
 const fileService = require('./services/file');
@@ -18,17 +17,20 @@ const templateManager = require('./template-manager');
 
 class Index {
     configLoader:Object
+    configPath:string
+    configPathType:string
+    changelogDataGenerator:Object
 
     /**
-     * @param {githubToken} token - Github access token
+     * @param {string} githubToken - Github access token
      * @param {string} configPath - Path to config location
      * @param {string} configPathType - Type of the path (Absolute|Relative)
      */
-    constructor (githubToken:string, configPath?:string, configPathType?:string) {
-    	this.configLoader = new ConfigLoader(githubToken);
-    	this.configPath = configPath;
-    	this.configPathType = configPathType;
-    	this.changelogDataGenerator = new ChangelogDataGenerator();
+    constructor(githubToken:string, configPath?:string, configPathType?:string) {
+        this.configLoader = new ConfigLoader(githubToken);
+        this.configPath = configPath;
+        this.configPathType = configPathType;
+        this.changelogDataGenerator = new ChangelogDataGenerator(githubToken);
     }
 
     /**

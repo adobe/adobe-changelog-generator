@@ -9,23 +9,27 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import type { FileManagerInterface } from './api/file-manager-interface.js';
+import type { FileManagerInterface } from '../api/file-manager-interface.js';
 
-const loaders = {};
-const LoadManager:FileManagerInterface = {
+const registry = {};
+const GroupRegistry:FileManagerInterface = {
     /**
-     * Loads loader from loaders folder by name
+     * Loads group by name
      *
      * @param name
-     * @return {*}
+     * @param config
+     * @return {Promise<Object|null>}
      */
-    get: (name:string):Function => {
-        name = name.toLowerCase();
-        if (!loaders[name]) {
-            loaders[name] = require(`./loaders/${name}.js`);
+    get: (name:string, config:Object):Function => {
+        if (!name) {
+            return null;
         }
-        return loaders[name];
+        name = name.toLowerCase();
+        if (!registry[name]) {
+            registry[name] = require(`../groups/${name}.js`);
+        }
+        return new registry[name](config);
     }
 };
 
-module.exports = LoadManager;
+module.exports = GroupRegistry;

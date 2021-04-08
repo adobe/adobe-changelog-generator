@@ -20,9 +20,9 @@ class ConfigLoader {
     githubNamespaceParser:Object
 
     /**
-     * @param {githubToken} githubToken - Github access token
+     * @param {string} githubToken
      */
-    constructor (string:githubToken) {
+    constructor (githubToken:string) {
         const githubService = new GithubService(githubToken);
         this.githubRestClient = githubService.getRestClient();
         this.aioConfig = aioConfig; // TODO: extract aio
@@ -58,10 +58,10 @@ class ConfigLoader {
      * @param {string} pathType - path type (absolute|relative). Default: Absolute
      * @return {Promise<JSON|Error|*>}
      */
-    async getLocalConfig (configPath?:string, pathType:string):Object {
-  	return configPath
-  		? fileLoader.load(configPath, pathType)
-  		: this.aioConfig.get('changelog') || {};
+    async getLocalConfig(configPath?:string, pathType:string):Object {
+        return configPath
+            ? fileLoader.load(configPath, pathType)
+            : this.aioConfig.get('changelog') || {};
     }
 }
 

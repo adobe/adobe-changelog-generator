@@ -10,26 +10,17 @@ governing permissions and limitations under the License.
 */
 
 import type { LoaderInterface } from '../api/loader-interface.js';
-import type { FilterInterface } from '../api/filter-interface.js';
 import type { PullRequestData } from '../api/data/pullrequest.js';
 import type { graphql } from '@octokit/graphql';
 
 class PullRequestLoader implements LoaderInterface {
   githubGraphQlClient:graphql
-  filters:Array<FilterInterface>
-  groupBy:Object
 
   /**
-     * @param githubService
-     * @param filters
-     * @param groupBy
-     */
-  constructor (
-  	    githubService:graphql,
-  	    filters:Array<FilterInterface> = [],
-  	    groupBy:Object = {}
-  ) {
-  	    this.githubGraphQlClient = githubService.getGraphQlClient();
+   * @ram githubService
+   */
+  constructor(githubService:graphql) {
+      this.githubGraphQlClient = githubService.getGraphQlClient();
   }
 
   /**

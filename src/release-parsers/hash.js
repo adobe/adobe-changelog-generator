@@ -17,12 +17,14 @@ class Hash implements ReleaseParsersInterface {
     sortOrder:number;
     regexp:RegExp;
     githubService:Object;
+    githubRestClient:Object;
 
     /**
      * @param {Object} githubService
      */
     constructor(githubService:Object) {
     	this.githubService = githubService;
+        this.githubRestClient = this.githubService.getRestClient();
     	this.sortOrder = 10;
     	this.regexp = /\b[0-9a-f]{40}\b/;
     }
@@ -42,15 +44,40 @@ class Hash implements ReleaseParsersInterface {
     }
 
     /**
+     *
+     * @param org
+     * @param repo
+     * @param point
+     * @param filter
+     * @return {Promise<Date>}
+     */
+    async getFromDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
+        return this.getDate(org, repo, point, filter);
+    }
+
+    /**
+     *
+     * @param org
+     * @param repo
+     * @param point
+     * @param filter
+     * @return {Promise<Date>}
+     */
+    async getToDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
+        return this.getDate(org, repo, point, filter);
+    }
+
+    /**
      * Gets commit from Github and returns commit created date
      *
      * @param {string} org
      * @param {string} repo
      * @param {string} point
+     * @param {RegExp} filter
      * @return {Promise<Date|null>}
      */
-    async getDate(org:string, repo:string, point:string):Promise<Date> {
-    	const commit = await this.githubService.git.getCommit({ owner: org, repo, commit_sha: point });
+    async getDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
+    	const commit = await this.githubRestClient.git.getCommit({ owner: org, repo, commit_sha: point });
     	return _.get(commit, 'data.committer.date') ?
     		new Date(_.get(commit, 'data.committer.date')) :
     		null;

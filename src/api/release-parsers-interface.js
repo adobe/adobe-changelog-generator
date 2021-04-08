@@ -9,21 +9,30 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
+const Octokit = require('@octokit/rest').Octokit;
+
 export interface ReleaseParsersInterface {
+    /**
+     * @param githubClient
+     */
+    constructor(githubClient:Octokit): void;
+
     /**
      * Returns sort order
      */
-    getSortOrder():number;
+    getSortOrder(): number;
 
     /**
      * Returns regexp to parse release
      */
-    getRegExp():RegExp;
+    getRegExp(): RegExp;
 
     /**
      * @param org
      * @param repo
      * @param point
+     * @param filter
      */
-    getDate(org:string, repo:string, point:string):Promise<Date>;
+    getFromDate(org:string, repo:string, point:string, filter:?RegExp): Promise<Date>;
+    getToDate(org:string, repo:string, point:string, filter:?RegExp): Promise<Date>;
 }

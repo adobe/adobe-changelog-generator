@@ -10,8 +10,9 @@ governing permissions and limitations under the License.
 */
 
 const aioConfig = require('@adobe/aio-lib-core-config');
-const { graphql } = require('@octokit/graphql');
+const {graphql} = require('@octokit/graphql');
 const Octokit = require('@octokit/rest').Octokit;
+const addMilliseconds = require('date-fns/addMilliseconds');
 
 class Github {
     graphqlClient:graphql
@@ -20,9 +21,9 @@ class Github {
     /**
      * @param {string} token
      */
-    constructor (token:string):void {
-  	    this.graphqlClient = graphql.defaults({ headers: { authorization: `token ${token}` } });
-  	    this.restClient = new Octokit({ auth: `token ${token}` });
+    constructor(token:string):void {
+        this.graphqlClient = graphql.defaults({headers: {authorization: `token ${token}`}});
+        this.restClient = new Octokit({auth: `token ${token}`});
     }
 
     /**
@@ -30,18 +31,19 @@ class Github {
      *
      * @param {string} org
      * @param {string} repo
+     * @param {RegExp} filter
      * @return {Promise<{}>}
      */
-    async getAllTags (org:string, repo:string) {
-  	let query;
-  	let cursor = null;
-  	let hasNextPage = null;
-  	let after = '';
-  	let response = null;
-  	let result = [];
-  	do {
-  		after = cursor ? `after:"${cursor}"` : '';
-  		query = `
+    async getAllTags(org:string, repo:string, filter:? RegExp) {
+        let query;
+        let cursor = null;
+        let hasNextPage = null;
+        let after = '';
+        let response = null;
+        let result = [];
+        do {
+            after = cursor ? `after:"${cursor}"` : '';
+            query = `
         {
           repository(name: "${repo}", owner: "${org}") {
             refs(refPrefix: "refs/tags/", first: 100, orderBy: {field: TAG_COMMIT_DATE, direction: ASC} ${after}) {
@@ -65,20 +67,27 @@ class Github {
             }
           }
         }`;
-  		response = await this.graphqlClient(query);
-  		hasNextPage = response.repository.refs.pageInfo.hasNextPage;
-  		cursor = response.repository.refs.pageInfo.endCursor;
-  		result = [...result, ...response.repository.refs.nodes];
-  	} while (hasNextPage);
+            response = await this.graphqlClient(query);
+            hasNextPage = response.repository.refs.pageInfo.hasNextPage;
+            cursor = response.repository.refs.pageInfo.endCursor;
+            result = [...result, ...response.repository.refs.nodes];
+        } while (hasNextPage);
 
-  	const data = {};
-  	result.forEach((item, index) => {
-  		data[item.name] = {
-  			from: result[index - 1] ? data[result[index - 1].name].to : new Date('2000/01/01'),
-  			to: new Date(item.target.committedDate || item.target.tagger.date)
-  		};
-  	});
-  	return data;
+        const data = {};
+
+        if (filter) {
+            result = result.filter((item:Object) => !item.name.match(filter));
+        }
+
+
+        result.forEach((item, index) => {
+            data[item.name] = {
+                from: result[index - 1] ? addMilliseconds(data[result[index - 1].name].to, 1) : new Date('2000/01/01'),
+                to: new Date(item.target.committedDate || item.target.tagger.date)
+            };
+        });
+
+        return data;
     }
 
     /**
@@ -86,8 +95,8 @@ class Github {
      *
      * @return {Octokit}
      */
-    getRestClient () {
-  	return this.restClient;
+    getRestClient() {
+        return this.restClient;
     }
 
     /**
@@ -95,8 +104,8 @@ class Github {
      *
      * @return {graphql}
      */
-    getGraphQlClient () {
-  	return this.graphqlClient;
+    getGraphQlClient() {
+        return this.graphqlClient;
     }
 }
 

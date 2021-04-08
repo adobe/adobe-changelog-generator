@@ -12,8 +12,10 @@ governing permissions and limitations under the License.
 import type {ReleaseParsersInterface} from '../api/release-parsers-interface.js';
 
 const _ = require('lodash');
+const specialWords = require('../models/special-words');
+const addMilliseconds = require('date-fns/addMilliseconds');
 
-class Tag implements ReleaseParsersInterface {
+class SpecialWords implements ReleaseParsersInterface {
     sortOrder:number;
     regexp:RegExp;
     githubService:Object;
@@ -25,8 +27,8 @@ class Tag implements ReleaseParsersInterface {
     constructor(githubService:Object) {
         this.githubService = githubService;
         this.githubRestClient = this.githubService.getRestClient();
-        this.sortOrder = 40;
-        this.regexp = /^([\S+]{1,20})$/;
+        this.sortOrder = 30;
+        this.regexp = new RegExp(`^${specialWords.now}$|^${specialWords.current}$|^${specialWords.start}$`);
     }
 
     /**
@@ -52,8 +54,7 @@ class Tag implements ReleaseParsersInterface {
      * @return {Promise<Date>}
      */
     async getFromDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
-        const versions = await this.githubService.getAllTags(org, repo, filter);
-        return versions[point].from;
+        return this.getDate(org, repo, point, filter);
     }
 
     /**
@@ -65,12 +66,40 @@ class Tag implements ReleaseParsersInterface {
      * @return {Promise<Date>}
      */
     async getToDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
-        const ref = await this.githubRestClient.git.getRef({owner: org, repo, ref: `tags/${point}`});
-        const commit = await this.githubRestClient.git.getCommit({owner: org, repo, commit_sha: ref.data.object.sha});
-        return _.get(commit, 'data.committer.date') ?
-            new Date(_.get(commit, 'data.committer.date')) :
-            null;
+        return this.getDate(org, repo, point, filter);
+    }
+
+    /**
+     * Gets commit from Github and returns commit created date
+     *
+     * @param {string} org
+     * @param {string} repo
+     * @param {string} point
+     * @param {RegExp} filter
+     * @return {Promise<Date|null>}
+     */
+    async getDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
+        let output;
+
+        switch (point) {
+            case specialWords.current: {
+                const versions = await this.githubService.getAllTags(org, repo, filter);
+                output = addMilliseconds(versions[_.last(Object.keys(versions))].to, 1);
+                break;
+            }
+            case specialWords.now: {
+                output = new Date();
+                break;
+            }
+            case specialWords.start: {
+                const versions = await this.githubService.getAllTags(org, repo, filter);
+                output = versions[Object.keys(versions)[0]].from;
+                break;
+            }
+        }
+
+        return output || null;
     }
 }
 
-module.exports = Tag;
+module.exports = SpecialWords;

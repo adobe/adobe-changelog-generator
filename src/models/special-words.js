@@ -9,14 +9,8 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import type {PullRequestData} from './data/pullrequest.js';
-
-export interface FilterInterface {
-    constructor(props:Array<string>): void,
-
-    /**
-     * Filters data by specific rules
-     * @param data
-     */
-    execute(data:Array<PullRequestData>): Array<PullRequestData>
-}
+module.exports = {
+    now: 'now',
+    current: 'current',
+    start: 'start'
+};

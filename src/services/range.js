@@ -11,18 +11,22 @@ governing permissions and limitations under the License.
 
 const _ = require('lodash');
 const DynamicFilesLoader = require('./dynamic-files-loader');
+const addMilliseconds = require('date-fns/addMilliseconds');
+
 class Range {
     githubService:Object
     restGithubClient:Object
+    releasedVersionsCache:Object
 
     /**
      * @param {Object} githubService
      */
-    constructor (githubService:Object) {
-  	    this.githubService = githubService;
-  	    this.restGithubClient = githubService.getRestClient();
-  	    this.dynamicFilesLoader = new DynamicFilesLoader('release-parsers');
-  	    this.parsers = [];
+    constructor(githubService:Object) {
+        this.githubService = githubService;
+        this.restGithubClient = githubService.getRestClient();
+        this.dynamicFilesLoader = new DynamicFilesLoader('release-parsers');
+        this.releasedVersionsCache = {};
+        this.parsers = [];
     }
 
     /**
@@ -31,34 +35,39 @@ class Range {
      * @return {Promise<[]>}
      */
     async getParsers():Promise<Array> {
-  	    if (!this.parsers.length) {
-  		    this.parsers = Object.values(await this.dynamicFilesLoader.getAll());
-  		    this.parsers.sort((Next:Object, Prev:Object) =>
-  			    (new Next()).getSortOrder() > (new Prev()).getSortOrder()
-  		    );
-  	    }
-  	    return this.parsers;
+        if (!this.parsers.length) {
+            this.parsers = Object.values(await this.dynamicFilesLoader.getAll());
+            this.parsers.sort((Next:Object, Prev:Object) =>
+                (new Next(this.githubService)).getSortOrder() > (new Prev(this.githubService)).getSortOrder()
+            );
+        }
+        return this.parsers;
     }
 
     /**
      * Converts hash/date/tag/etc to time format
      *
      * @param {string} point
+     * @param {string} direction
      * @param {string} org
      * @param {string} repo
      * @return {Promise<Date|number|*>}
      */
-    async getByPoint(point:string, org:string, repo:string):Number {
-  	const parsers = await this.getParsers();
+    async getByPoint(point:string, direction:string, org:string, repo:string, filter?:RegExp):Number {
+        const parsers = await this.getParsers();
 
-  	for (const Parser of parsers) {
-  		const parser = new Parser(this.restGithubClient);
-  		const match = point.match(parser.getRegExp());
+        for (const Parser of parsers) {
+            const parser = new Parser(this.githubService);
+            const match = point && point.match(parser.getRegExp());
 
-  		if (match) {
-  			return parser.getDate(org, repo, point);
-  		}
-  	}
+            if (match && direction === 'from') {
+                return parser.getFromDate(org, repo, point, filter);
+            }
+
+            if (match && direction === 'to') {
+                return parser.getToDate(org, repo, point, filter);
+            }
+        }
     }
 
     /**
@@ -70,12 +79,63 @@ class Range {
      * @param {string} to
      * @return {Promise<{from: Date, to: Date}>}
      */
-    async getRange(org:string, repo:string, from:string, to:string):Object {
-  	return {
-  		from: await this.getByPoint(from, org, repo),
-  		to: await this.getByPoint(to, org, repo)
-  	};
+    async getRange(org:string, repo:string, from:string, to:string, filter?:RegExp):Object {
+        return {
+            from: await this.getByPoint(from, 'from', org, repo, filter),
+            to: await this.getByPoint(to, 'to', org, repo, filter)
+        };
     };
+
+    /**
+     *
+     * @param toRelease
+     * @param org
+     * @param repo
+     * @param filter
+     * @return {Promise<string>}
+     */
+    async getReleaseVersion(toRelease:string, org:string, repo:string, filter:string):string {
+        const regexp = /^major$|^minor$|^patch$/;
+        const match = toRelease.match(regexp);
+        const versions = await this.getReleasedVersions(org, repo, filter);
+        const lastReleased = _.last(Object.keys(versions));
+
+        if (!match) { return toRelease;}
+
+        const lastReleasedSplit = lastReleased.split('.');
+
+        switch (match[0]) {
+            case 'patch': {
+                ++lastReleasedSplit[2];
+                break;
+            }
+            case 'minor': {
+                ++lastReleasedSplit[1];
+                break;
+            }
+            case 'major': {
+                ++lastReleasedSplit[0];
+                break;
+            }
+        }
+
+        return lastReleasedSplit.join('.');
+    }
+
+    /**
+     *
+     * @param org
+     * @param repo
+     * @param filter
+     * @return {Promise<Object>}
+     */
+    async getReleasedVersions(org:string, repo:string, filter?:string) {
+        const key = org.concat(repo, filter);
+        if (!this.releasedVersionsCache[key]) {
+            this.releasedVersionsCache[key] = await this.githubService.getAllTags(org, repo, filter);
+        }
+        return this.releasedVersionsCache[key];
+    }
 
     /**
      * Returns repository versions with time ranges that satisfy from to condition
@@ -89,30 +149,33 @@ class Range {
      * @return {Promise<*>}
      */
     async getVersions(org:string, repo:string, from:string, to:string, filter?:string, version?:string) {
-  	    const versions = await this.githubService.getAllTags(org, repo);
-  	    const versionsList = Object.keys(versions);
-  	    const lastReleaseDate = versions[versionsList[versionsList.length -1]].to;
+        const versions = await this.getReleasedVersions(org, repo, filter);
+        const versionsList = Object.keys(versions);
+        const lastReleaseVersion = versionsList[versionsList.length - 1];
+        const lastReleaseDate = versions[lastReleaseVersion].to;
         const fromTimestamp = (new Date(from)).getTime();
         const toTimestamp = (new Date(to)).getTime();
-  	    const mergedTags = {
-  	        ...versions,
-            [version]: {
-  	            from: lastReleaseDate,
+
+        if (version) {
+            const preparedReleaseVersion = await this.getReleaseVersion(version, org, repo, filter);
+            versions[preparedReleaseVersion] = {
+                from: addMilliseconds(lastReleaseDate, 1),
                 to: (new Date(lastReleaseDate)).getTime() < toTimestamp ? to : new Date()
-  	        }};
+            };
+        }
 
-  	    return _.pickBy(mergedTags, (data, name) => {
-  		    const tagFromTimestamp = (new Date(data.from)).getTime();
-  		    const tagToTimestamp = (new Date(data.to)).getTime();
+        return _.pickBy(versions, (data, name) => {
+            const tagFromTimestamp = (new Date(data.from)).getTime();
+            const tagToTimestamp = (new Date(data.to)).getTime();
 
-  		    if (name.match(filter)) {
-  			    return false;
-  		    }
+            if (filter && name.match(filter)) {
+                return false;
+            }
 
-  		    return (tagFromTimestamp >= fromTimestamp && tagFromTimestamp <= toTimestamp) ||
+            return (tagFromTimestamp >= fromTimestamp && tagFromTimestamp <= toTimestamp) ||
                 (tagToTimestamp >= fromTimestamp && tagToTimestamp <= toTimestamp) ||
                 (tagFromTimestamp < fromTimestamp && tagToTimestamp > toTimestamp);
-  	    });
+        });
     }
 }
 

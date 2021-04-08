@@ -10,5 +10,5 @@ governing permissions and limitations under the License.
 */
 
 export interface FileManagerInterface {
-  get(name:string):Function
+    get(name:string): Function
 }

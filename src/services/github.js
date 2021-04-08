@@ -9,7 +9,6 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const aioConfig = require('@adobe/aio-lib-core-config');
 const {graphql} = require('@octokit/graphql');
 const Octokit = require('@octokit/rest').Octokit;
 const addMilliseconds = require('date-fns/addMilliseconds');

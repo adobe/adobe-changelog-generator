@@ -2,7 +2,6 @@ const ConfigLoader = require('../../src/services/config-loader');
 const configFixture = require('../fixture/config.json');
 const githubService = require('../mocks/github-service');
 const path = require('path');
-//TODO: Mock configuration
 const configLoader = new ConfigLoader(githubService.githubServiceMock, {});
 
 describe('GetLocalConfig', () => {

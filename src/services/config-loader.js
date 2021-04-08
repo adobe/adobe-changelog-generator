@@ -12,7 +12,7 @@ governing permissions and limitations under the License.
 const fileLoader = require('./file');
 const aioConfig = require('@adobe/aio-lib-core-config');
 const GithubService = require('./github');
-const GithubNamespaceParser = require("./github-namespace-parser");
+const GithubNamespaceParser = require('./github-namespace-parser');
 
 class ConfigLoader {
     aioConfig:Object
@@ -20,10 +20,9 @@ class ConfigLoader {
     githubNamespaceParser:Object
 
     /**
-     * @param {string} githubToken
+     * @param {string} githubService
      */
-    constructor (githubToken:string) {
-        const githubService = new GithubService(githubToken);
+    constructor (githubService:GithubService) {
         this.githubRestClient = githubService.getRestClient();
         this.aioConfig = aioConfig; // TODO: extract aio
         this.githubNamespaceParser = new GithubNamespaceParser();

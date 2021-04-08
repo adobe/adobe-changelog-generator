@@ -13,8 +13,10 @@ const _ = require('lodash');
 const ConfigLoader = require('./services/config-loader');
 const ChangelogDataGenerator = require("./services/changelog-data-generator");
 const changelogWriterRegistry = require('./services/changelog-writer-registry');
+const GithubService = require('./services/github');
 
 class Index {
+    githubService:Object
     configLoader:Object
     configPath:string
     configPathType:string
@@ -26,10 +28,11 @@ class Index {
      * @param {string} configPathType - Type of the path (Absolute|Relative)
      */
     constructor(githubToken:string, configPath?:string, configPathType?:string) {
-        this.configLoader = new ConfigLoader(githubToken);
+        this.githubService = new GithubService(githubToken);
+        this.configLoader = new ConfigLoader(this.githubService);
         this.configPath = configPath;
         this.configPathType = configPathType;
-        this.changelogDataGenerator = new ChangelogDataGenerator(githubToken);
+        this.changelogDataGenerator = new ChangelogDataGenerator(this.githubService);
     }
 
     /**

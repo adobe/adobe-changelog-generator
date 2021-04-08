@@ -28,10 +28,10 @@ class ChangelogDataGenerator {
     changelogGenerationTermsParser:Object
 
     /**
-     * @param {string} githubToken - Github access token
+     * @param {string} githubService - Github access token
      */
-    constructor (githubToken:string) {
-        this.githubService = new GithubService(githubToken);
+    constructor (githubService:GithubService) {
+        this.githubService = githubService;
         this.rangeService = new RangeService(this.githubService);
         this.githubNamespaceParser = new GithubNamespaceParser();
         this.changelogGenerationTermsParser = new ChangelogGenerationTermsParser();

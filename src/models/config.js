@@ -47,7 +47,7 @@ class Config {
      * @param name
      * @return {Object}
      */
-    getFilter(name:string): Array<string> {
+    getFilter(name:string):Array<string> {
         return this.getFilters()[name];
     }
 

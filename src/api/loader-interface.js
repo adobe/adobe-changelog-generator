@@ -9,17 +9,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import { FilterInterface } from './filter-interface.js';
-import type { PullRequestData } from './data/pullrequest.js';
-import { graphql } from '@octokit/graphql';
-
 export interface LoaderInterface {
-    constructor(
-        githubClient:graphql,
-        filters:Array<FilterInterface>,
-        groupBy:Object
-    ):void,
-
     /**
      * Loads data from Github by specific rules
      *

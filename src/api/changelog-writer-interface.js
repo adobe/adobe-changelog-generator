@@ -9,23 +9,15 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-export interface ReleaseParsersInterface {
+export interface ChangelogWriterInterface {
     /**
-     * Returns sort order
+     * Write output based on changelog data
+     *
+     * @param changelogData
+     * @param {Object} config
      */
-    getSortOrder(): number;
-
-    /**
-     * Returns regexp to parse release
-     */
-    getRegExp(): RegExp;
-
-    /**
-     * @param org
-     * @param repo
-     * @param point
-     * @param filter
-     */
-    getFromDate(org:string, repo:string, point:string, filter:?RegExp): Promise<Date>;
-    getToDate(org:string, repo:string, point:string, filter:?RegExp): Promise<Date>;
+    generate(
+        changelogData:Array<string>,
+        config:Object
+    ):void
 }

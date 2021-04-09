@@ -9,16 +9,27 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-class NamespaceService {
-    /**
-     * Returns all namespaces from config
-     *
-     * @param config
-     * @return {string[]}
-     */
-    getNames(config:Object):Array<string> {
-        return Object.keys(config);
-    }
-}
+import { graphql } from '@octokit/graphql';
 
-module.exports = NamespaceService;
+const registry = {};
+const LoaderRegistry = {
+    /**
+     * Loads loader by name
+     *
+     * @param name
+     * @param {{graphql}} githubService TODO: should be removed from parameters
+     * @return {Promise<Object|null>}
+     */
+    get: (name:string, githubService:graphql):Function => {
+        if (!name) {
+            return null;
+        }
+        name = name.toLowerCase();
+        if (!registry[name]) {
+            registry[name] = require(`../loaders/${name}.js`);
+        }
+        return new registry[name](githubService);
+    }
+};
+
+module.exports = LoaderRegistry;

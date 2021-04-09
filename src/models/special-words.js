@@ -9,22 +9,8 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import type { FileManagerInterface } from './api/file-manager-interface.js';
-
-const groups = {};
-const GroupManager:FileManagerInterface = {
-    /**
-     * Loads group class from groups folder by name
-     *
-     * @param name
-     * @return {*}
-     */
-    get: (name:string):Function => {
-        if (!groups[name]) {
-            groups[name] = require(`./groups/${name}.js`);
-        }
-        return groups[name];
-    }
+module.exports = {
+    now: 'now',
+    current: 'current',
+    start: 'start'
 };
-
-module.exports = GroupManager;

@@ -9,10 +9,8 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import type { FileManagerInterface } from './api/file-manager-interface.js';
-
 const filters = {};
-const FileManager:FileManagerInterface = {
+const FileManager = {
     /**
      * Loads filter from filters folder by names
      *

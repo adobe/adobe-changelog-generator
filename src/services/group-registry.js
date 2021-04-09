@@ -9,6 +9,25 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-export interface FileManagerInterface {
-  get(name:string):Function
-}
+const registry = {};
+const GroupRegistry = {
+    /**
+     * Loads group by name
+     *
+     * @param name
+     * @param config
+     * @return {Promise<Object|null>}
+     */
+    get: (name:string, config:Object):Function => {
+        if (!name) {
+            return null;
+        }
+        name = name.toLowerCase();
+        if (!registry[name]) {
+            registry[name] = require(`../groups/${name}.js`);
+        }
+        return new registry[name](config);
+    }
+};
+
+module.exports = GroupRegistry;

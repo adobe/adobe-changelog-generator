@@ -18,29 +18,29 @@ class Config {
     /**
      * @param {Object} data
      */
-    constructor (data:Object):void {
-    	this.data = data;
+    constructor(data:Object):void {
+        this.data = data;
     }
 
     /**
      * @return {string}
      */
-    getLoaderName ():string {
-    	return this.data.loader.name;
+    getLoaderName():string {
+        return this.data.loader.name;
     }
 
     /**
      * @return {*|{}}
      */
-    getFilters ():Object {
-    	return _.get(this.data, 'loader.config.exclude') || {};
+    getFilters():Object {
+        return _.get(this.data, 'loader.config.exclude') || {};
     }
 
     /**
      * @return {string[]}
      */
     getFilterNames():Array<string> {
-    	return Object.keys(this.getFilters());
+        return Object.keys(this.getFilters());
     }
 
     /**
@@ -48,49 +48,56 @@ class Config {
      * @return {Object}
      */
     getFilter(name:string):Array<string> {
-    	return this.getFilters()[name];
+        return this.getFilters()[name];
     }
 
     /**
      * @return {string}
      */
-    getGroupName ():string {
-    	return _.get(this.data, 'loader.config.groupBy.name');
+    getGroupName():string {
+        return _.get(this.data, 'loader.config.groupBy.name');
     }
 
     /**
      * @return {Object}
      */
-    getGroupConfig ():Object {
-    	return _.get(this.data, 'loader.config.groupBy.config');
+    getGroupConfig():Object {
+        return _.get(this.data, 'loader.config.groupBy.config');
     }
 
     /**
      * @return {string}
      */
-    getTemplate ():string {
-    	return _.get(this.data, 'output.template');
+    getTemplate():string {
+        return _.get(this.data, 'output.template');
     }
 
     /**
      * @return {string}
      */
-    getProjectPath ():string {
-    	return _.get(this.data, 'output.projectPath');
+    getProjectPath():string {
+        return _.get(this.data, 'output.projectPath');
     }
 
     /**
      * @return {string}
      */
-    getFilename ():string {
-    	return _.get(this.data, 'output.filename');
+    getFilename():string {
+        return _.get(this.data, 'output.filename');
+    }
+
+    /**
+     * @return {string}
+     */
+    getOutputFormat():string {
+        return _.get(this.data, 'output.format');
     }
 
     /**
      * @return {Object}
      */
-    getCombined ():Object {
-    	return _.get(this.data, 'combine');
+    getCombined():Object {
+        return _.get(this.data, 'combine');
     }
 }
 

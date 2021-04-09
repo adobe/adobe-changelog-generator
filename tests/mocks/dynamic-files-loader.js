@@ -2,17 +2,21 @@ const getSortOrderFirst = jest.fn(() => 1);
 const getSortOrderSecond = jest.fn(() => 2);
 const getRegExpFirst = jest.fn(() => 'testFirst');
 const getRegExpSecond = jest.fn(() => 'testSecond');
-const getDateFirst = jest.fn(() => new Date('2021/03/20'));
-const getDateSecond = jest.fn(() => new Date('2021/03/21'));
+const getFromSecond = jest.fn(() => new Date('2021/03/18'));
+const getFromFirst = jest.fn(() => new Date('2021/03/20'));
+const getToFirst = jest.fn(() => new Date('2021/03/21'));
+const getToSecond = jest.fn(() => new Date('2021/03/19'));
 const parserFirst = jest.fn(() => ({
     getSortOrder: getSortOrderFirst,
     getRegExp: getRegExpFirst,
-    getDate: getDateFirst
+    getFromDate: getFromFirst,
+    getToDate: getToFirst
 }));
 const parserSecond = jest.fn(() => ({
     getSortOrder: getSortOrderSecond,
     getRegExp: getRegExpSecond,
-    getDate: getDateSecond
+    getFromDate: getFromSecond,
+    getToDate: getToSecond
 }));
 const getAllMock = jest.fn(() => ({parserSecond, parserFirst }));
 
@@ -24,6 +28,8 @@ module.exports = {
     parserSecond,
     getRegExpFirst,
     getRegExpSecond,
-    getDateFirst,
-    getDateSecond
+    getFromFirst,
+    getFromSecond,
+    getToFirst,
+    getToSecond
 }

@@ -11,19 +11,44 @@ governing permissions and limitations under the License.
 
 const webpack = require('webpack');
 const path = require("path");
+const glob = require('glob');
+const getEntryPointsForFolders = (folders) => {
+    let result = {};
+    folders.forEach((folder) => {
+        result = {
+            ...result,
+            ...glob.sync(`./src/${folder}/*.js`).reduce((previousValue, currentValue) => {
+                return {
+                        ...previousValue,
+                        [`${folder}/${path.basename(currentValue, path.extname(currentValue))}`]: currentValue
+                    }
+            }, {})
+        }
+
+    })
+    return result;
+};
 
 module.exports = (async () => {
     return {
         mode: 'development',
         target: 'node',
         entry: {
-            app: './src/index.js',
+            index: './src/index.js',
+            ...getEntryPointsForFolders([
+                'template-directives',
+                'template-handlers',
+                'release-parsers',
+                'writers',
+                'groups',
+                'loaders',
+            ])
         },
         stats: {
             errorDetails: true,
         },
         output: {
-            filename: "index.js",
+            filename: '[name].js',
             path: path.resolve(__dirname + "/dist"),
             libraryTarget: 'umd'
         },
@@ -37,6 +62,11 @@ module.exports = (async () => {
                     }
                 }
             ]
-        }
+        },
+        plugins:[
+            new webpack.EnvironmentPlugin({
+                'ROOT_DIR': 'vz'
+            })
+        ],
     };
 })();

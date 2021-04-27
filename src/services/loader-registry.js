@@ -8,11 +8,21 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
+const DynamicFilesLoader = require('./dynamic-files-loader');
+const CaseConvertor = require('./case-convertor');
 
-import { graphql } from '@octokit/graphql';
+class LoaderRegistry {
+    dynamicFilesLoader:Object
+    caseConvertor:Object
 
-const registry = {};
-const LoaderRegistry = {
+    /**
+     * @constructor
+     */
+    constructor() {
+        this.dynamicFilesLoader = new DynamicFilesLoader('loaders');
+        this.caseConvertor = new CaseConvertor();
+    }
+
     /**
      * Loads loader by name
      *
@@ -20,16 +30,10 @@ const LoaderRegistry = {
      * @param {{graphql}} githubService TODO: should be removed from parameters
      * @return {Promise<Object|null>}
      */
-    get: (name:string, githubService:graphql):Function => {
-        if (!name) {
-            return null;
-        }
-        name = name.toLowerCase();
-        if (!registry[name]) {
-            registry[name] = require(`../loaders/${name}.js`);
-        }
-        return new registry[name](githubService);
+    get(name:string, githubService:Object):Function {
+        const Loader = this.dynamicFilesLoader.get(this.caseConvertor.convertPascalToDash(name));
+        return new Loader(githubService);
     }
-};
+}
 
 module.exports = LoaderRegistry;

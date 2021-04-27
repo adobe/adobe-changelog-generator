@@ -17,6 +17,7 @@ class Range {
     githubService:Object
     restGithubClient:Object
     releasedVersionsCache:Object
+    parsers:Array
 
     /**
      * @param {Object} githubService
@@ -37,8 +38,8 @@ class Range {
     async getParsers():Promise<Array> {
         if (!this.parsers.length) {
             this.parsers = Object.values(await this.dynamicFilesLoader.getAll());
-            this.parsers.sort((Next:Object, Prev:Object) =>
-                (new Next(this.githubService)).getSortOrder() > (new Prev(this.githubService)).getSortOrder()
+            this.parsers.sort((Next, Prev) =>
+                (new Next(this.githubService)).getSortOrder() - (new Prev(this.githubService)).getSortOrder()
             );
         }
         return this.parsers;
@@ -51,9 +52,9 @@ class Range {
      * @param {string} direction
      * @param {string} org
      * @param {string} repo
-     * @return {Promise<Date|number|*>}
+     * @return {Promise<Date>}
      */
-    async getByPoint(point:string, direction:string, org:string, repo:string, filter?:RegExp):Number {
+    async getByPoint(point:string, direction:string, org:string, repo:string, filter?:RegExp):Promise<Date | null> {
         const parsers = await this.getParsers();
 
         for (const Parser of parsers) {
@@ -94,7 +95,7 @@ class Range {
      * @param filter
      * @return {Promise<string>}
      */
-    async getReleaseVersion(toRelease:string, org:string, repo:string, filter:string):string {
+    async getReleaseVersion(toRelease:string, org:string, repo:string, filter?:string):Promise<string> {
         const regexp = /^major$|^minor$|^patch$/;
         const match = toRelease.match(regexp);
         const versions = await this.getReleasedVersions(org, repo, filter);

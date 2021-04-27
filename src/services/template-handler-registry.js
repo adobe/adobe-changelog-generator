@@ -8,32 +8,34 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
+import type { TemplateHandlerInterface } from '../api/template-handler-interface';
 
 const DynamicFilesLoader = require('./dynamic-files-loader');
 const CaseConvertor = require('./case-convertor');
 
-class ChangelogWriterRegistry {
-    dynamicFilesLoader:Object;
+class TemplateHandlerRegistry {
     caseConvertor:Object;
+    dynamicFilesLoader:Object;
 
     /**
      * @constructor
      */
     constructor() {
-        this.dynamicFilesLoader = new DynamicFilesLoader('writers');
         this.caseConvertor = new CaseConvertor();
+        this.dynamicFilesLoader = new DynamicFilesLoader('template-handlers');
     }
 
     /**
-     * Loads changelog writer by name
      *
-     * @param name
-     * @return {Promise<Object|null>}
+     * @param {string} name
+     * @return {TemplateHandlerInterface}
      */
-    get(name:string):Function {
-        const Writer = this.dynamicFilesLoader.get(this.caseConvertor.convertPascalToDash(name));
-        return new Writer();
+    get(name:string):TemplateHandlerInterface {
+        const Handler = this.dynamicFilesLoader.get(
+            this.caseConvertor.convertPascalToDash(name.slice(0, name.length-1))
+        );
+        return new Handler();
     }
 }
 
-module.exports = ChangelogWriterRegistry;
+module.exports = TemplateHandlerRegistry;

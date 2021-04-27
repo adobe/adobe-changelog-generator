@@ -19,6 +19,7 @@ const parserSecond = jest.fn(() => ({
     getToDate: getToSecond
 }));
 const getAllMock = jest.fn(() => ({parserSecond, parserFirst }));
+const get = jest.fn(() => parserFirst);
 
 module.exports = {
     getAllMock,
@@ -31,5 +32,6 @@ module.exports = {
     getFromFirst,
     getFromSecond,
     getToFirst,
-    getToSecond
+    getToSecond,
+    get
 }

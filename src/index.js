@@ -12,8 +12,9 @@ governing permissions and limitations under the License.
 const _ = require('lodash');
 const ConfigLoader = require('./services/config-loader');
 const ChangelogDataGenerator = require("./services/changelog-data-generator");
-const changelogWriterRegistry = require('./services/changelog-writer-registry');
+const ChangelogWriterRegistry = require('./services/changelog-writer-registry');
 const GithubService = require('./services/github');
+const Config = require('./models/config');
 
 class Index {
     githubService:Object
@@ -30,6 +31,7 @@ class Index {
     constructor(githubToken:string, configPath?:string, configPathType?:string) {
         this.githubService = new GithubService(githubToken);
         this.configLoader = new ConfigLoader(this.githubService);
+        this.changelogWriterRegistry = new ChangelogWriterRegistry();
         this.configPath = configPath;
         this.configPathType = configPathType;
         this.changelogDataGenerator = new ChangelogDataGenerator(this.githubService);
@@ -47,14 +49,13 @@ class Index {
             namespaceNames : Object.keys(localConfig);
 
         for await (const namespaceName of namespaceNamesList) {
-            const { releaseLine, combine, ...configOptions } = _.merge(
+            const configOptions = _.merge(
                 await this.configLoader.getRepositoryConfig(namespaceName),
-                localConfig
+                localConfig[namespaceName]
             );
             const config = new Config(configOptions);
-            const data = await this.changelogDataGenerator(namespaceName, config);
-
-            changelogWriterRegistry.get(config.getOutputFormat()).write(data, config);
+            const data = await this.changelogDataGenerator.getChangelogData(namespaceName, config);
+            this.changelogWriterRegistry.get(config.getOutputFormat()).write(data, config);
         }
     }
 }

@@ -19,9 +19,9 @@ module.exports = {
      * @return {JSON|Error}
      */
     load: (path:string, type:string):JSON | Error => {
-        return JSON.parse(fs.readFileSync(
+        return JSON.parse(Buffer.from(fs.readFileSync(
             type === 'relative' ? pathLib.join(process.cwd(), path) : path
-        ));
+        )).toString());
     },
 
     /**

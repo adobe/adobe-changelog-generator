@@ -12,8 +12,8 @@ governing permissions and limitations under the License.
 const _ = require('lodash');
 
 class Config {
-    data:Object
-    name:string
+    data:Object;
+    name:string;
 
     /**
      * @param {Object} data
@@ -27,6 +27,20 @@ class Config {
      */
     getLoaderName():string {
         return this.data.loader.name;
+    }
+
+    /**
+     * @return {string}
+     */
+    getReleaseLine():string {
+        return this.data.releaseLine;
+    }
+
+    /**
+     * @return {string}
+     */
+    getCombine():string {
+        return this.data.combine;
     }
 
     /**
@@ -90,7 +104,7 @@ class Config {
      * @return {string}
      */
     getOutputFormat():string {
-        return _.get(this.data, 'output.format');
+        return _.get(this.data, 'output.format') || 'md';
     }
 
     /**

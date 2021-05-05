@@ -12,14 +12,14 @@ governing permissions and limitations under the License.
 import type {LoaderInterface} from '../api/loader-interface';
 import type {FilterInterface} from '../api/filter-interface';
 const _ = require('lodash');
-const GithubService = require('./services/github');
-const asyncService = require('./services/async');
-const groupRegistry = require('./services/group-registry');
-const loaderRegistry = require('./services/loader-registry');
-const filterManager = require('./filter-manager');
-const RangeService = require("./services/range");
-const GithubNamespaceParser = require("./services/github-namespace-parser");
-const ChangelogGenerationTermsParser = require("./services/changelog-generation-terms-parser");
+const GithubService = require('./github');
+const asyncService = require('./async');
+const GroupRegistry = require('./group-registry');
+const LoaderRegistry = require('./loader-registry');
+const filterManager = require('../filter-manager');
+const RangeService = require("./range");
+const GithubNamespaceParser = require("./github-namespace-parser");
+const ChangelogGenerationTermsParser = require("./changelog-generation-terms-parser");
 
 class ChangelogDataGenerator {
     githubService:Object
@@ -34,6 +34,8 @@ class ChangelogDataGenerator {
         this.githubService = githubService;
         this.rangeService = new RangeService(this.githubService);
         this.githubNamespaceParser = new GithubNamespaceParser();
+        this.groupRegistry = new GroupRegistry();
+        this.loaderRegistry = new LoaderRegistry();
         this.changelogGenerationTermsParser = new ChangelogGenerationTermsParser();
     }
 
@@ -45,11 +47,11 @@ class ChangelogDataGenerator {
      * @return {Object}
      */
     async getChangelogData(namespaceName:string, config:Object) {
-        const loader:LoaderInterface = await loaderRegistry.get(config.getLoaderName(), this.githubService);
-        const groupBy = await groupRegistry.get(config.getGroupName(), config.getGroupConfig());
+        const loader:LoaderInterface = await this.loaderRegistry.get(config.getLoaderName(), this.githubService);
+        const groupBy = await this.groupRegistry.get(config.getGroupName(), config.getGroupConfig());
         const filters = await this.getFilters(config);
         return await asyncService.mapValuesAsync(
-            {[namespaceName]: releaseLine, ...combine},
+            {[namespaceName]: config.getReleaseLine(), ...config.getCombine()},
             (releaseLine, namespaceName) => this.collectData(
                 namespaceName,
                 releaseLine,
@@ -95,10 +97,10 @@ class ChangelogDataGenerator {
             changelogGenerationTerms.filter,
             changelogGenerationTerms.version
         );
-
         let data = await loader.execute(
             namespace.organization,
             namespace.repository,
+            namespace.branch,
             timeRange.from,
             timeRange.to
         );

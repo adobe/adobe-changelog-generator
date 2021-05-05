@@ -9,8 +9,21 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const registry = {};
-const GroupRegistry = {
+const DynamicFilesLoader = require('./dynamic-files-loader');
+const CaseConvertor = require('./case-convertor');
+
+class GroupRegistry {
+    dynamicFilesLoader:Object;
+    caseConvertor:Object;
+
+    /**
+     * @constructor
+     */
+    constructor() {
+        this.dynamicFilesLoader = new DynamicFilesLoader('groups');
+        this.caseConvertor = new CaseConvertor();
+    }
+
     /**
      * Loads group by name
      *
@@ -18,16 +31,10 @@ const GroupRegistry = {
      * @param config
      * @return {Promise<Object|null>}
      */
-    get: (name:string, config:Object):Function => {
-        if (!name) {
-            return null;
-        }
-        name = name.toLowerCase();
-        if (!registry[name]) {
-            registry[name] = require(`../groups/${name}.js`);
-        }
-        return new registry[name](config);
+    get(name:string, config:Object):Function {
+        const Group = this.dynamicFilesLoader.get(this.caseConvertor.convertPascalToDash(name));
+        return new Group(config);
     }
-};
+}
 
 module.exports = GroupRegistry;

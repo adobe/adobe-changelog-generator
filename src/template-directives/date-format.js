@@ -9,19 +9,21 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const templates = {};
-const TemplateManager = {
-    /**
-     * Loads template from templates folder by name
-     * @param name
-     * @return {*}
-     */
-    get: (name:string):Function => {
-        if (!templates[name]) {
-            templates[name] = require(`./templates/${name}.js`);
-        }
-        return templates[name];
-    }
-};
+import type { TemplateDirectiveInterface } from '../api/template-directive-interface';
+const formatFns = require('date-fns/format');
 
-module.exports = TemplateManager;
+class DateFormat implements TemplateDirectiveInterface {
+    /**
+     * Change date format
+     *
+     * @param value
+     * @param param
+     * @return {string}
+     */
+    execute(value:string, param:Array<string>):string {
+        const date = new Date(value);
+        return formatFns(new Date(date.getTime() + date.getTimezoneOffset() * 60000), param[0]);
+    }
+}
+
+module.exports = DateFormat;

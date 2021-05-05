@@ -11,10 +11,19 @@ governing permissions and limitations under the License.
 
 import type { ChangelogWriterInterface } from '../api/changelog-writer-interface.js';
 
-const fileService = require('./services/file');
-const templateManager = require('./template-manager');
+const fileService = require('../services/file');
+const TemplateEngine = require('../services/template-engine');
+const templateRegistry = require('../services/template-registry');
 
 class Md implements ChangelogWriterInterface {
+    templateEngine:Object;
+
+    /**
+     * @constructor
+     */
+    constructor() {
+        this.templateEngine = new TemplateEngine();
+    }
     /**
      * Write changelog data to file
      *
@@ -23,11 +32,9 @@ class Md implements ChangelogWriterInterface {
      * @return void
      */
     async write(changelogData:Array<string>, config:Object) {
-        const template = templateManager.get(config.getTemplate());
-        fileService.create(
-            `${config.getProjectPath()}/${config.getFilename()}`,
-            template(data)
-        );
+        const template = templateRegistry.get(config.getTemplate());
+        const evaluatedTemplateString = await this.templateEngine.generateByTemplate(template, changelogData);
+        fileService.create(`${config.getProjectPath()}/${config.getFilename()}`, evaluatedTemplateString);
     }
 }
 

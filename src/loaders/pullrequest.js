@@ -28,6 +28,7 @@ class PullRequestLoader implements LoaderInterface {
      *
      * @param organization
      * @param repository
+     * @param branch
      * @param from
      * @param to
      * @return {Promise<{createdAt: Object.createdAt, contributionType: Object.contributionType, number: Object.number, author: Object.author.login, organization: string, repository: string, title: Object.title, url: Object.url, labels: Object.labels.nodes}[]>}

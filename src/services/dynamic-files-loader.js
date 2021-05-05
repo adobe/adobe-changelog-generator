@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const glob = require('glob');
+const requireFunc = typeof __webpack_require__ === "function" ? __non_webpack_require__ : require;
 
 class DynamicFilesLoader {
     dir:string;
@@ -21,7 +23,8 @@ class DynamicFilesLoader {
      */
     get(name:string) {
     	if (!this.cache[name]) {
-    		this.cache[name] = require(`./${this.dir}/${name}.js`);
+            const dirname = path.resolve('dist', this.dir);
+    		this.cache[name] = requireFunc(`${dirname}/${name}.js`);
     	}
     	return this.cache[name];
     }
@@ -32,13 +35,14 @@ class DynamicFilesLoader {
      * @return {{}}
      */
     getAll() {
-    	const dirname = path.resolve(__dirname, '../src/' + this.dir);
+    	const dirname = path.resolve('dist', this.dir);
     	const filenames:Array<string> = fs.readdirSync(dirname);
     	const files = {};
-    	filenames.forEach((filename:string) => {
-    		files[filename] = require(`../release-parsers/${filename}`);
-    	});
-
+    	filenames.forEach(
+    	    (filename:string) => {
+    	        files[filename.split('.')[0]] = requireFunc(`${dirname}/${filename}`);
+            }
+        );
     	return files;
     }
 }

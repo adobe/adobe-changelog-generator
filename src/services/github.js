@@ -14,7 +14,7 @@ const Octokit = require('@octokit/rest').Octokit;
 const addMilliseconds = require('date-fns/addMilliseconds');
 
 class Github {
-    graphqlClient:graphql
+    graphqlClient:Object
     restClient:Octokit
 
     /**

@@ -1,5 +1,5 @@
-<!--repeat_namespaces-->
-{{namespace}}
+<!--repeat_namespaces|scope_content-->
+{{namespace|namespace_format:short|capitalize}}
 =============
 <!--repeat_releases-->
 ## {{tag}} ({{created_at|date_format:dd-MM-yy}}) {{repository}} or {{organization}} or {{branch}}    

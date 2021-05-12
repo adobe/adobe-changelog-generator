@@ -11,18 +11,32 @@ governing permissions and limitations under the License.
 
 const pathLib = require('path');
 const fs = require('fs');
-module.exports = {
+
+class File {
     /**
-     * Loads JSON file
+     * Loads file
      * @param {string} path - Path to the file
      * @param {string} type - Type of the path (Absolute|Relative)
-     * @return {JSON|Error}
+     * @return {string|Error}
      */
-    load: (path:string, type:string):JSON | Error => {
+    load (path:string, type:string):JSON | Error {
+        return Buffer.from(fs.readFileSync(
+            type === 'relative' ? pathLib.join(process.cwd(), path) : path
+        )).toString();
+    };
+
+    /**
+     * Load JSON file
+     *
+     * @param {string} path
+     * @param {string} type
+     * @return {any}
+     */
+    loadJSON (path:string, type:string):JSON | Error {
         return JSON.parse(Buffer.from(fs.readFileSync(
             type === 'relative' ? pathLib.join(process.cwd(), path) : path
         )).toString());
-    },
+    }
 
     /**
      * Creates file
@@ -31,7 +45,21 @@ module.exports = {
      * @param data
      * @param callback
      */
-    create: (path:string, data:string, callback?:Function):void | Error => {
+    create(path:string, data:string, callback?:Function):void | Error {
         return fs.writeFile(path, data, callback ? callback : () => {});
     }
-};
+
+    /**
+     * Merge data to existing file
+     *
+     * @param path
+     * @param data
+     * @param callback
+     */
+    merge(path:string, data:string, callback?:Function):void | Error {
+        const file = this.load(path, 'absolute');
+        this.create(path, file + data, callback);
+    }
+}
+
+module.exports = new File();

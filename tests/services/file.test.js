@@ -4,16 +4,16 @@ const path = require('path');
 const fs = require('fs');
 
 describe('Load', () => {
-    it('Successfully loading file with relative path', async () => {
-        const configFixtureLoaded = fileService.load(
+    it('Successfully loading JSON file with relative path', async () => {
+        const configFixtureLoaded = fileService.loadJSON(
             './tests/fixture/config.json',
             'relative'
         );
         expect(configFixtureLoaded).toBeTruthy();
         expect(configFixtureLoaded).toEqual(configFixture);
     })
-    it('Successfully loading file with absolute path', async () => {
-        const configFixtureLoaded = fileService.load(
+    it('Successfully loading JSON file with absolute path', async () => {
+        const configFixtureLoaded = fileService.loadJSON(
             path.join(process.cwd(), './tests/fixture/config.json')
         );
         expect(configFixtureLoaded).toBeTruthy();
@@ -29,7 +29,7 @@ describe('Load', () => {
 })
 describe('Create', () => {
     it('Successfully create file', async () => {
-        const configFixtureLoaded = fileService.load(
+        const configFixtureLoaded = fileService.loadJSON(
             './tests/fixture/config.json',
             'relative'
         );

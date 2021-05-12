@@ -8,24 +8,25 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
-const fs = require('fs');
-const pathLib = require('path');
 
-const templates = {};
-const templateRegistry = {
+import type { TemplateDirectiveInterface } from '../api/template-directive-interface';
+const formatFns = require('date-fns/format');
+
+class NamespaceFormat implements TemplateDirectiveInterface {
     /**
-     * Loads template from templates folder by name
-     * @param name
-     * @return {*}
+     * Change namespace format
+     *
+     * @param value
+     * @param param
+     * @return {string}
      */
-    get: (name:string):Function => {
-        if (!templates[name]) {
-            const binary = fs.readFileSync(pathLib.join(process.cwd(), `/src/templates/${name}.md`));
-            templates[name] = Buffer.from(binary, 'base64').toString('binary');
+    execute(value:string, param:Array<string>):string {
+        if (param[0] === 'short') {
+            return value.split('/')[1];
         }
 
-        return templates[name];
+        return value;
     }
-};
+}
 
-module.exports = templateRegistry;
+module.exports = NamespaceFormat;

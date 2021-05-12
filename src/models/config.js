@@ -87,6 +87,13 @@ class Config {
     }
 
     /**
+     * @return {*|string}
+     */
+    getStrategy():string {
+        return _.get(this.data, 'output.strategy') || 'create';
+    }
+
+    /**
      * @return {string}
      */
     getProjectPath():string {

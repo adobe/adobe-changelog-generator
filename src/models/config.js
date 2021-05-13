@@ -89,7 +89,7 @@ class Config {
     /**
      * @return {*|string}
      */
-    getStrategy():string {
+    getOutputStrategy():string {
         return _.get(this.data, 'output.strategy') || 'create';
     }
 

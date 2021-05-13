@@ -10,14 +10,11 @@ governing permissions and limitations under the License.
 */
 
 import type { TemplateDirectiveInterface } from '../api/template-directive-interface';
-const formatFns = require('date-fns/format');
 
 class NamespaceFormat implements TemplateDirectiveInterface {
     /**
-     * Change namespace format
-     *
-     * @param value
-     * @param param
+     * @param {string} value
+     * @param {Array} param
      * @return {string}
      */
     execute(value:string, param:Array<string>):string {

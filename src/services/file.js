@@ -48,18 +48,6 @@ class File {
     create(path:string, data:string, callback?:Function):void | Error {
         return fs.writeFile(path, data, callback ? callback : () => {});
     }
-
-    /**
-     * Merge data to existing file
-     *
-     * @param path
-     * @param data
-     * @param callback
-     */
-    merge(path:string, data:string, callback?:Function):void | Error {
-        const file = this.load(path, 'absolute');
-        this.create(path, file + data, callback);
-    }
 }
 
 module.exports = new File();

@@ -22,7 +22,7 @@ describe('write', () => {
     it('Successfully write with create strategy', async () => {
         const md = new Md();
         const config = {
-            getStrategy: jest.fn(() => 'create'),
+            getOutputStrategy: jest.fn(() => 'create'),
             getProjectPath: jest.fn(() => 'path'),
             getFilename: jest.fn(() => 'changelog'),
             getTemplate: jest.fn(() => 'template')
@@ -31,13 +31,13 @@ describe('write', () => {
         expect(config.getTemplate).toHaveBeenCalledTimes(1)
         expect(templateRegistryMock.get).toHaveBeenCalledTimes(1)
         expect(templateEngineMock.generateByTemplate).toHaveBeenCalledTimes(1)
-        expect(config.getStrategy).toHaveBeenCalledTimes(1);
+        expect(config.getOutputStrategy).toHaveBeenCalledTimes(1);
         expect(fileService.create).toHaveBeenCalledTimes(1);
     })
     it('Successfully write with merge strategy', async () => {
         const md = new Md();
         const config = {
-            getStrategy: jest.fn(() => 'merge'),
+            getOutputStrategy: jest.fn(() => 'merge'),
             getProjectPath: jest.fn(() => 'path'),
             getFilename: jest.fn(() => 'changelog'),
             getTemplate: jest.fn(() => 'template')
@@ -47,7 +47,7 @@ describe('write', () => {
         expect(config.getTemplate).toHaveBeenCalledTimes(1)
         expect(templateRegistryMock.get).toHaveBeenCalledTimes(1)
         expect(templateEngineMock.generateByTemplate).toHaveBeenCalledTimes(1)
-        expect(config.getStrategy).toHaveBeenCalledTimes(2);
+        expect(config.getOutputStrategy).toHaveBeenCalledTimes(2);
         expect(md.merge).toHaveBeenCalledTimes(1);
     })
 })

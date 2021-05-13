@@ -35,9 +35,9 @@ class Md implements ChangelogWriterInterface {
     async write(changelogData:Array<string>, config:Object) {
         const template = templateRegistry.get(config.getTemplate());
         const evaluatedTemplateString = await this.templateEngine.generateByTemplate(template, changelogData);
-        if (config.getStrategy() === 'create') {
+        if (config.getOutputStrategy() === 'create') {
             fileService.create(`${config.getProjectPath()}/${config.getFilename()}`, evaluatedTemplateString);
-        } else if (config.getStrategy() === 'merge') {
+        } else {
             this.merge(evaluatedTemplateString, config);
         }
     }
@@ -47,7 +47,7 @@ class Md implements ChangelogWriterInterface {
      *
      * @param evaluatedTemplateString
      * @param config
-     * @return {Promise<void>}
+     * @return {void}
      */
     async merge(evaluatedTemplateString:Array<string>, config:Object):void {
         const file = fileService.load(`${config.getProjectPath()}/${config.getFilename()}`);

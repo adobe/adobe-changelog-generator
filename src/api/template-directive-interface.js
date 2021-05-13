@@ -11,6 +11,8 @@ governing permissions and limitations under the License.
 
 export interface TemplateDirectiveInterface {
     /**
+     * Extension point for new directives.
+     * Each new directive should implement this interface
      *
      * @param {string} value
      * @param {Array<string>} param

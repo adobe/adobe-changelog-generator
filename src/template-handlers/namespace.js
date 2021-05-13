@@ -38,8 +38,9 @@ class NamespaceHandler implements TemplateHandlerInterface {
         const namespaces = Object.keys(data);
         const results = [];
         namespaces.forEach((namespace:string) => {
-            variables.namespace = namespace;
-            variables = {...variables, ...this.githubNamespaceParser.parse(namespace)};
+            const parsedNamespace = this.githubNamespaceParser.parse(namespace);
+            variables.namespace = `${parsedNamespace.organization}/${parsedNamespace.repository}`;
+            variables = {...variables, ...parsedNamespace};
 
             results.push({
                 evaluatedTemplate: this.templateStringProcessor.evaluateStringTemplate(

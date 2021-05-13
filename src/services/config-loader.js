@@ -59,7 +59,7 @@ class ConfigLoader {
      */
     async getLocalConfig(configPath?:string, pathType:string):Object {
         return configPath
-            ? fileLoader.load(configPath, pathType)
+            ? fileLoader.loadJSON(configPath, pathType)
             : this.aioConfig.get('changelog') || {};
     }
 }

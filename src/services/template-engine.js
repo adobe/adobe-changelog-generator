@@ -54,6 +54,10 @@ class TemplateEngine {
             if (item.inside) {
                 templateString += this.getEvaluatedStringByEvaluatedTree(item.inside);
             }
+
+            if (item.insertAfter) {
+                templateString += item.insertAfter;
+            }
         });
 
         return templateString;
@@ -75,6 +79,13 @@ class TemplateEngine {
             const handlerResults = handler.execute(item.template, data, variables, directives);
             handlerResults.forEach((handlerResult:Array<Object>) => {
                 const nestedObject = {evaluatedTemplate: handlerResult.evaluatedTemplate};
+                if (item.repeatDirective === 'scope_content') {
+                    nestedObject.insertAfter =
+                        `<!--${item.type}_${handlerResult.variables.organization}_${handlerResult.variables.repository}_scope_end-->`;
+                    nestedObject.evaluatedTemplate +=
+                        `<!--${item.type}_${handlerResult.variables.organization}_${handlerResult.variables.repository}_scope_start-->`;
+                }
+
                 iteration.push(nestedObject);
                 if (item.inside) {
                     nestedObject.inside = [];
@@ -130,6 +141,11 @@ class TemplateEngine {
                 type: dataRepeat.name,
                 template: dataRepeat.template
             };
+
+            if (dataRepeat.repeatDirective) {
+                data.repeatDirective = dataRepeat.repeatDirective;
+            }
+
             if (internalDataRepeat) {
                 data.inside = [];
                 data.template = dataRepeat.template.substring(0, internalDataRepeat.startRepeatIndexFrom);
@@ -149,7 +165,7 @@ class TemplateEngine {
      * @return {null|{}}
      */
     findRepeat(templateString:string):Object {
-        const parsed = templateString.match(/<!--repeat_([A-Za-z_0-9]+)-->/);
+        const parsed = templateString.match(/<!--repeat_([A-Za-z_0-9]+)(?:(\|([A-Za-z_0-9]+)))?-->/);
 
         if (!parsed) {
             return null;
@@ -162,6 +178,7 @@ class TemplateEngine {
         return {
             template: templateString.substring(startRepeatIndexTo, endRepeatIndexFrom),
             startRepeatIndexFrom: parsed.index,
+            repeatDirective: parsed[3],
             startRepeatIndexTo,
             endRepeatIndexFrom,
             endRepeatIndexTo: endRepeatIndexFrom + endRepeatTag.length,

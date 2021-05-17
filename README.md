@@ -360,3 +360,14 @@ Note: The name of the file will be used as group name.
     }
 ```
 
+
+
+## Maintainers and Contributors
+
+This project is maintained by [Open Contribution Office](https://wiki.corp.adobe.com/display/DMSArchitecture/Open+Contribution+Office).
+
+## Contact Us
+
+**Slack**: [#devex-open-contribution-office](https://magento.slack.com/archives/C018Z6CB57U)
+
+**Mail**: [devex-open-contribution-office@adobe.com](mailto:devex-open-contribution-office@adobe.com)

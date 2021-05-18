@@ -1,21 +1,22 @@
 {
-  "name": "adobe-changelog-generator",
+  "name": "@adobe/hangelog-generator",
   "version": "1.0.0",
   "dependencies": {
     "@adobe/aio-lib-core-config": "^2.0.0",
     "@octokit/rest": "^18.3.1",
-    "babel-cli": "^6.26.0",
     "glob": "^7.1.6",
     "lodash": "^4.17.20",
     "string-template-parser": "^1.2.6"
   },
   "devDependencies": {
+    "@babel/cli": "^7.13.16",
     "@babel/plugin-transform-flow-strip-types": "^7.13.0",
     "@babel/preset-env": "^7.13.10",
     "@babel/preset-flow": "^7.12.13",
     "babel-core": "^6.26.3",
     "babel-eslint": "^10.1.0",
     "babel-loader": "^8.2.2",
+    "copy-webpack-plugin": "^8.1.1",
     "date-fns": "^2.19.0",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
@@ -27,8 +28,8 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "flow-bin": "^0.63.1",
-    "flow-coverage-report": "^0.4.0",
-    "flow-typed": "^2.2.3",
+    "flow-coverage-report": "^0.8.0",
+    "flow-typed": "^3.3.1",
     "jest": "^24",
     "jest-haste-map": "^24.5.0",
     "jest-junit": "^6.0.0",
@@ -44,7 +45,7 @@
     "/dist"
   ],
   "license": "Apache-2.0",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "pretest": "npm run lint",
     "lint": "eslint \"src/**/*.js\"",

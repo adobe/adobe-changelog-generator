@@ -23,7 +23,7 @@ class DynamicFilesLoader {
      */
     get(name:string) {
     	if (!this.cache[name]) {
-            const dirname = path.resolve('dist', this.dir);
+            const dirname = path.resolve(__basedir, this.dir);
     		this.cache[name] = requireFunc(`${dirname}/${name}.js`);
     	}
     	return this.cache[name];
@@ -35,7 +35,7 @@ class DynamicFilesLoader {
      * @return {{}}
      */
     getAll() {
-    	const dirname = path.resolve('dist', this.dir);
+    	const dirname = path.resolve(__basedir, this.dir);
     	const filenames:Array<string> = fs.readdirSync(dirname);
     	const files = {};
     	filenames.forEach(

@@ -20,7 +20,7 @@ const templateRegistry = {
      */
     get: (name:string):Function => {
         if (!templates[name]) {
-            const binary = fs.readFileSync(pathLib.join(process.cwd(), `/src/templates/${name}.md`));
+            const binary = fs.readFileSync(pathLib.join(__basedir, `/templates/${name}.md`));
             templates[name] = Buffer.from(binary, 'base64').toString('binary');
         }
 

@@ -12,6 +12,7 @@ governing permissions and limitations under the License.
 const webpack = require('webpack');
 const path = require("path");
 const glob = require('glob');
+const CopyPlugin = require("copy-webpack-plugin");
 const getEntryPointsForFolders = (folders) => {
     let result = {};
     folders.forEach((folder) => {
@@ -64,9 +65,11 @@ module.exports = (async () => {
             ]
         },
         plugins:[
-            new webpack.EnvironmentPlugin({
-                'ROOT_DIR': 'vz'
-            })
+            new CopyPlugin({
+                patterns: [
+                    { from: "src/templates", to: "templates" }
+                ],
+            }),
         ],
     };
 })();

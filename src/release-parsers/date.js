@@ -12,8 +12,8 @@ governing permissions and limitations under the License.
 import type { ReleaseParsersInterface } from '../api/release-parsers-interface.js';
 
 const _ = require('lodash');
-const endOfDay = require('date-fns/endOfDay');
-const parseISO = require('date-fns/parseISO');
+const endOfDay = require('date-fns').endOfDay;
+const parseISO = require('date-fns').parseISO;
 
 class Date implements ReleaseParsersInterface {
     sortOrder:number;

@@ -13,7 +13,7 @@ import type {ReleaseParsersInterface} from '../api/release-parsers-interface.js'
 
 const _ = require('lodash');
 const specialWords = require('../models/special-words');
-const addMilliseconds = require('date-fns/addMilliseconds');
+const addMilliseconds = require('date-fns').addMilliseconds;
 
 class SpecialWords implements ReleaseParsersInterface {
     sortOrder:number;

@@ -12,7 +12,7 @@ governing permissions and limitations under the License.
 import type { TemplateHandlerInterface } from '../api/template-handler-interface';
 
 const TemplateStringProcessor = require('../services/template-string-processor');
-const formatFns = require('date-fns/format');
+const formatFns = require('date-fns').format;
 
 class ReleaseHandler implements TemplateHandlerInterface {
     templateStringProcessor:Object;

@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 
 const _ = require('lodash');
 const DynamicFilesLoader = require('./dynamic-files-loader');
-const addMilliseconds = require('date-fns/addMilliseconds');
+const addMilliseconds = require('date-fns').addMilliseconds;
 
 class Range {
     githubService:Object

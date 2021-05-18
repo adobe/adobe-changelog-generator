@@ -10,7 +10,7 @@ governing permissions and limitations under the License.
 */
 
 import type { TemplateDirectiveInterface } from '../api/template-directive-interface';
-const formatFns = require('date-fns/format');
+const formatFns = require('date-fns').format;
 
 class DateFormat implements TemplateDirectiveInterface {
     /**

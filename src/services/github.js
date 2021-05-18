@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 
 const {graphql} = require('@octokit/graphql');
 const Octokit = require('@octokit/rest').Octokit;
-const addMilliseconds = require('date-fns/addMilliseconds');
+const addMilliseconds = require('date-fns').addMilliseconds;
 
 class Github {
     graphqlClient:Object

@@ -47,7 +47,7 @@ describe('write', () => {
         expect(config.getTemplate).toHaveBeenCalledTimes(1)
         expect(templateRegistryMock.get).toHaveBeenCalledTimes(1)
         expect(templateEngineMock.generateByTemplate).toHaveBeenCalledTimes(1)
-        expect(config.getOutputStrategy).toHaveBeenCalledTimes(2);
+        expect(config.getOutputStrategy).toHaveBeenCalledTimes(1);
         expect(md.merge).toHaveBeenCalledTimes(1);
     })
 })

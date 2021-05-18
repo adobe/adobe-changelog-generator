@@ -35,6 +35,7 @@ class Index {
         this.configPath = configPath;
         this.configPathType = configPathType;
         this.changelogDataGenerator = new ChangelogDataGenerator(this.githubService);
+        global.__basedir = __dirname;
     }
 
     /**

@@ -16,8 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with:
-          token: ${{ secrets.ADOBE_BOT_GITHUB_TOKEN }}
       - name: Configure CI Git User
         run: |
           git config user.name adobe-bot

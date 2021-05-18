@@ -10,10 +10,10 @@ jobs:
         steps:
             - name: Checkout repository
               uses: actions/checkout@master
-            - name: Set up Node.js
-              uses: actions/setup-node@master
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v1
               with:
-                  node-version: 10.0.0
+                node-version: ${{ matrix.node-version }}
             - name: Install dependencies
               run: npm install
             - name: Build the project

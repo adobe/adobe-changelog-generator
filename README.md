@@ -13,8 +13,7 @@ governing permissions and limitations under the License.
 Adobe Changelog Generator
 =====================
 
-**Adobe Changelog Generator** is the core package that is uses to generate changelog file. 
-
+**Adobe Changelog Generator**  is the core package that is used to generate a changelog file.
 <!-- toc -->
 * [Usage](#usage)
 * [Commands](#commands)
@@ -113,11 +112,11 @@ EXAMPLE
 
 # Config options
 
-* `<organization>/<repository>:<branch>` - combination of organization, repository and branch is named namespace. Config can contain multiple namespaces. Tool will asynchronously generate changelog for each namespace.
+* `<organization>/<repository>:<branch>` - a combination of organization, repository, and branch is named namespace. Thus, the config can contain multiple namespaces. The tool asynchronously generates a changelog for each namespace.
     * `<organization>` - required
     * `<repository>` - required
     * `<branch>` - optional
-* `combine` - provide a list of related namespaces. In case if you project consist of multiple repositories and you want to create changelog that contains data from all repositories you should use this option.
+* `combine` - provide a list of related namespaces. For example, if your project consists of multiple repositories and wants to create a changelog containing data from all repositories, you should use this option.
     *  combine - optional
 * `releaseLine` - define from-to brackets to collect content. 
     * `<from>` - Starting point.   
@@ -129,8 +128,8 @@ EXAMPLE
         * `date` - Date in ISO8601 format. Example: YYYY-MM-DD
         * `special-words` - application supports the list of predefined special-words:
             * `now` - Current date and time
-            * `current` - Start date of ongoing version not released yet.
-            * `start` - Start date of first existing release.
+            * `current` - Start date of not released version.
+            * `start` - Start date of first stable release
     * `<to>` - Ending point.  
         **Optional**  
         **Default:** now  
@@ -142,7 +141,7 @@ EXAMPLE
             * `now` - Current date and time
             * `current` - Start date of ongoing version not released yet.
             * `start` - Start date of first existing release.
-    * `<version>` - the version of ongoing release.  
+    * `<version>` - the version for next release.  
         **Optional**  
         **Default:** patch.
         Can be one of the next type:
@@ -150,7 +149,7 @@ EXAMPLE
         * `minor` - Increment minor version of last release.     
         * `major` - Increment major version of last release.     
         * `version` - Custom version. Example: 1.0.1-custom.
-    * `<filter>` - Filter RegExp. Optional. Use it for exclude some releases. Example: ^1.1   
+    * `<filter>` - Filter RegExp. Optional. Use it for excluding some releases. Example: ^1.1   
 * `loader` - responsible to load Pull Request or Issue data from Github. Required.
     * `name` - loader name.
         * **Available options:**
@@ -166,22 +165,22 @@ EXAMPLE
                 * **Available options:**
                     * labels
             * `config` - configuration specific to group type
-* `output` - configuration of result file.
-    * `strategy` - responsible for output file. Will it be merged to an existing file or creating new one.  
+* `output` - result file configuration.
+    * `strategy` - responsible for output file. 
         * **Available options:**
-            * `merge`
-            * `create`
-    * `format` - format of output file.
+            * `merge` - merged with an existing file
+            * `create` - create a new file
+    * `format` - format for output file.
         * **Default:**
             * `md`
         * **Available options:**
             * `md`
              
-    * `template` - required. Name of template.
+    * `template` - required. Template name.
         * **Available templates:**
             * PullRequest
-    * `filename` - required. Name of output file.
-    * `projectPath` - required. Path to the project folder.        
+    * `filename` - required. Output file name.
+    * `projectPath` - required. Project folder path.        
 
 
 # Template example
@@ -204,8 +203,8 @@ EXAMPLE
 
 # Template declaration
 #### Template repeats
-Repeats created to iterate list of entities.  
-##### There are multiple type of repeats are available now:
+The repeats are used to iterate list of entities.  
+##### There are multiple types of repeats are available now:
 
 * `<!--repeat_namespaces-->  <!--repeat_namespaces_end-->` - Iterate namespaces.  
 For more details about namespaces see [config options](#config options).
@@ -261,37 +260,37 @@ the scope of changelog generation. The tags can mixed in any way to build custom
 Directives used for modifying/transforming value.
   
 ##### Multiple directives:
-Application allows use multiple directives on single data item. 
+The application allows using multiple directives on a single data item. 
 Directives will be applied from left to right.
 
 **Example:**  `{{namespace|namespace_format:short|capitalize}}`
 Firstly will be applied `namespace_format` directive and `capitalize` next
   
 ##### Directives list:
-* `namespace_format` - change view format of namespaces.
+* `namespace_format` - define view format of namespaces.
     * **Format:** `{{<namespace>|namespace_format:<option>}}`
     * **Options:**
         * Short
         * Long
-* `date_format` - change view format of date. Allowed to any date values. 
+* `date_format` - define view format of date. Allowed to any date values. 
     * **Format:** `{{<created_at>|date_format:<option>}}`
     * **Options:** Any datetime format
 * `capitalize` - Transform first letter in passed string. Allowed to any string values.
     * **Format:** `{{<namespace>|capitalize}}`
  
 #### Template repeat directives 
-Template repeat directives works like template directives but on repeats level.
+Template repeat directives work like template directives but on repeat levels.
 
 ##### Repeat directives list:
-* `scope_content` - system directive. The directive add invisible scope tags to output file.   
-This invisible scope tags used for output file parsing that is **required** in case when [strategy config option](#config options) is merge.
+* `scope_content` - system directive. The directive adds invisible scope tags to the output file.    
+These invisible scope tags are used for output file parsing that is **required** when [strategy config option](#config options) is merged.
 
 # Extensibility and customization
 #### Custom template
 Application supports custom templates, for that you need:
 
 * Create new `<custom_name>.md` file in `src/templates` folder.
-* Declare custom template uses `template repeats`, `template tags`, `template directives`.
+* Declare custom template using `template repeats`, `template tags`, `template directives`.
 * Set your custom template name to `output.template` config option.
 
 #### Custom template directive
@@ -299,7 +298,7 @@ Application supports custom templates, for that you need:
 * Create new `<custom_name>.js` file in `src/template-directives` folder.
 * Create new class implementing corresponding interface. (`src/api/template-directive-interface`)  
 Note: The name of the class will be used as directive name.
-* Use custom directive in template uses custom directive class name as the directive name. 
+* Use custom directive in template using custom directive class name as the directive name. 
 
 #### Custom template repeat
 
@@ -309,7 +308,7 @@ Note: The name of the class will be used as repeat name.
 * Use custom repeat in template uses custom repeat class name as the directive name.
     
 #### Custom release parser
-Application supports multiple type of declaration of version ranges, but you can simply create new one!
+The application supports multiple types of declaration of version ranges, but you can create a new one!
 
 * Create new `<custom_name>.js` file in `src/release-parsers` folder.
 * Create new class implementing corresponding interface. (`src/api/release-parsers-interface`)  
@@ -317,19 +316,19 @@ Note: The name of the file will be used as parser name.
 * The release parser will be automatically registered in application and available to use in configuration
 
 #### Custom writer
-Application supports multiple type of declaration of version ranges, but you can simply create new one!
+The application supports multiple types of declaration for version ranges, but you can create a new one!
 
 * Create new `<custom_name>.js` file in `src/writers` folder.
 * Create new class implementing corresponding interface. (`src/api/changelog-writer-interface`)  
-Note: The name of the file will be used as writer name.
+Note: The name of the file will be used as a writer name.
 * Set your custom writer name to `output.format` config option.
 
 #### Custom loader
-Custom loaders allow you to collect specific set of data from Github. 
+Custom loader allows you to collect a specific set of data from Github. 
 
 * Create new `<custom_name>.js` file in `src/loades` folder.
 * Create new class implementing corresponding interface. (`src/api/loader-interface`)  
-Note: The name of the file will be used as loader name.
+Note: The name of the file will be used as a loader name.
 * Set your custom loader name and configuration to `loader.name` and `loader.config` config options.
 
 **Custom loader configuration example**: 
@@ -351,7 +350,7 @@ Note: The name of the file will be used as filter name.
 Filters are responsible for filter data received from loader.
 
 * Create new `<custom_name>.js` file in `src/groups` folder.
-Note: The name of the file will be used as group name.
+Note: The name of the file will be used as a group name.
 * Set your custom group name and configuration to `loader.config.groupBy.name` config option.  
 **Example**: 
 ```

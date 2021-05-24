@@ -105,17 +105,6 @@ class Range {
 
         const lastReleasedSplit = lastReleased.split('.');
 
-        if (
-            !Number.isInteger(lastReleasedSplit[0]) ||
-            !Number.isInteger(lastReleasedSplit[1]) ||
-            !Number.isInteger(lastReleasedSplit[2])
-        ) {
-            throw new Error(
-                `Version ${lastReleased} doesn't follow Semver declaration.\n` +
-                `Version autoincrement functionality works only with Semver declaration.`
-            );
-        }
-
         switch (match[0]) {
             case 'patch': {
                 ++lastReleasedSplit[2];

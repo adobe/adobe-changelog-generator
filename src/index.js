@@ -45,7 +45,7 @@ class Index {
      * @return {Promise<void>}
      */
     async generate(namespaceNames?:Array<string>) {
-        const localConfig = await this.configLoader.getLocalConfig(this.configPath, this.configPathType);
+        const localConfig = await this.configLoader.getLocalConfig(this.configPath);
         const namespaceNamesList = namespaceNames && namespaceNames.length ?
             namespaceNames : Object.keys(localConfig);
 

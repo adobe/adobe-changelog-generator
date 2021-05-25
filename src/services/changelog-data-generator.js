@@ -48,7 +48,9 @@ class ChangelogDataGenerator {
      */
     async getChangelogData(namespaceName:string, config:Object) {
         const loader:LoaderInterface = await this.loaderRegistry.get(config.getLoaderName(), this.githubService);
-        const groupBy = await this.groupRegistry.get(config.getGroupName(), config.getGroupConfig());
+        const groupBy = config.getGroupName() ?
+            await this.groupRegistry.get(config.getGroupName(), config.getGroupConfig()) :
+            null;
         const filters = await this.getFilters(config);
         return await asyncService.mapValuesAsync(
             {[namespaceName]: config.getReleaseLine(), ...config.getCombine()},
@@ -131,6 +133,7 @@ class ChangelogDataGenerator {
                 const res = mergedAtTimestamp > fromTimestamp && mergedAtTimestamp < toTimestamp;
                 return mergedAtTimestamp > fromTimestamp && mergedAtTimestamp < toTimestamp;
             });
+
             if (!versionsRange[version].data) {
                 versionsRange[version].data = [];
             }

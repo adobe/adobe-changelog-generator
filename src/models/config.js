@@ -104,7 +104,7 @@ class Config {
      * @return {string}
      */
     getFilename():string {
-        return _.get(this.data, 'output.filename');
+        return _.get(this.data, 'output.filename') || 'CHANGELOG.md';
     }
 
     /**

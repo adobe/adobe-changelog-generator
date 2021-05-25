@@ -1,6 +1,6 @@
 {
   "name": "@adobe/changelog-generator",
-  "version": "1.0.3-1",
+  "version": "1.0.3-2",
   "dependencies": {
     "@adobe/aio-lib-core-config": "^2.0.0",
     "@octokit/rest": "^18.3.1",

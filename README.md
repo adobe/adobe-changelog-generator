@@ -28,7 +28,8 @@ $ aio plugins:install -g @adobe/aio-cli-plugin-changelog
 $ # OR
 $ aio discover -i
 $ aio changelog --help...
-$ aio config set <GITHUB_TOKEN>
+$ aio config:set GITHUB_TOKEN '<your token>'
+
 ```
 
 # Commands

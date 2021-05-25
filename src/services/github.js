@@ -75,7 +75,7 @@ class Github {
         const data = {};
 
         if (filter) {
-            result = result.filter((item:Object) => !item.name.match(filter));
+            result = result.filter((item:Object) => item.name.match(filter));
         }
 
 

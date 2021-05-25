@@ -2,7 +2,7 @@
 {{namespace|namespace_format:short|capitalize}}
 =============
 <!--repeat_releases-->
-## {{tag}} ({{created_at|date_format:dd-MM-yy}}) {{repository}} or {{organization}} or {{branch}}    
+## {{tag}} ({{created_at|date_format:dd-MM-yy}})    
 <!--repeat_contributionTypes-->
 ### {{contribution_type}}
 <!--repeat_items-->

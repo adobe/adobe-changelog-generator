@@ -169,7 +169,7 @@ class Range {
             const tagFromTimestamp = (new Date(data.from)).getTime();
             const tagToTimestamp = (new Date(data.to)).getTime();
 
-            if (filter && name.match(filter)) {
+            if (filter && !name.match(filter)) {
                 return false;
             }
 

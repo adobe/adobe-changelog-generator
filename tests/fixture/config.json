@@ -5,7 +5,7 @@
       "oco-test/buddy-repo:main": "79812ff63ed29693793c163a4e661706db342ae1..cc2dfa5db4feceb2aebe8bedc05c41bcec975e08@2.1.1:3333"
     },
     "output": {
-      "projectPath": "<test_path>"
+      "path": "<test_path>"
     }
   }
 }

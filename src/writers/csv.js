@@ -25,10 +25,9 @@ class Csv implements ChangelogWriterInterface {
      */
     async write(changelogData:Array<string>, config:Object) {
         const json2csvParser = new Parser();
-        const csv = json2csvParser.parse(changelogData);
-
+        const csv = json2csvParser.parse(JSON.stringify(changelogData));
         fileService.create(
-            `${config.getProjectPath()}/${config.getFilename()}`,
+            `${config.getProjectPath()}/${config.getFilename()}.${config.getOutputFormat()}`,
             csv
         );
     }

@@ -42,7 +42,7 @@ class ContributionTypeHandler implements TemplateHandlerInterface {
             results.push({
                 evaluatedTemplate: '',
                 variables,
-                data,
+                data: dataWithoutContributionType,
                 directives
             });
         }

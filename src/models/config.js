@@ -97,14 +97,14 @@ class Config {
      * @return {string}
      */
     getProjectPath():string {
-        return _.get(this.data, 'output.projectPath');
+        return _.get(this.data, 'output.path');
     }
 
     /**
      * @return {string}
      */
     getFilename():string {
-        return _.get(this.data, 'output.filename') || 'CHANGELOG.md';
+        return _.get(this.data, 'output.filename') || 'CHANGELOG';
     }
 
     /**

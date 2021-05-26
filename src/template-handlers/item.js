@@ -33,6 +33,7 @@ class ItemHandler implements TemplateHandlerInterface {
      */
     execute(template:string, data:Object, variables = {}, directives = {}) {
         const results = [];
+        data = data || [];
         data.forEach((item:Object) => {
             variables.repository = item.repository;
             variables.organization = item.organization;

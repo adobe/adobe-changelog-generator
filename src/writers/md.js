@@ -36,7 +36,10 @@ class Md implements ChangelogWriterInterface {
         const template = templateRegistry.get(config.getTemplate());
         const evaluatedTemplateString = await this.templateEngine.generateByTemplate(template, changelogData);
         if (config.getOutputStrategy() === 'create') {
-            fileService.create(`${config.getProjectPath()}/${config.getFilename()}`, evaluatedTemplateString);
+            fileService.create(
+                `${config.getProjectPath()}/${config.getFilename()}.${config.getOutputFormat()}`,
+                evaluatedTemplateString
+            );
         } else {
             this.merge(evaluatedTemplateString, config);
         }
@@ -50,9 +53,11 @@ class Md implements ChangelogWriterInterface {
      * @return {void}
      */
     async merge(evaluatedTemplateString:Array<string>, config:Object):void {
-        const file = fileService.load(`${config.getProjectPath()}/${config.getFilename()}`);
+        const file = fileService.load(
+            `${config.getProjectPath()}/${config.getFilename()}.${config.getOutputFormat()}`
+        );
         const fileNamespaces = this.getSplitsByNamespace(file);
-        const fullPath = `${config.getProjectPath()}/${config.getFilename()}`;
+        const fullPath = `${config.getProjectPath()}/${config.getFilename()}.${config.getOutputFormat()}`;
         if (!file.length) {
             fileService.create(fullPath, evaluatedTemplateString);
             return;
@@ -81,7 +86,10 @@ class Md implements ChangelogWriterInterface {
             result += fileNamespaces[namespace].content;
         });
 
-        fileService.create(`${config.getProjectPath()}/${config.getFilename()}`, result);
+        fileService.create(
+            `${config.getProjectPath()}/${config.getFilename()}.${config.getOutputFormat()}`,
+            result
+        );
     }
 
     /**

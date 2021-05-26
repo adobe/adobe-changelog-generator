@@ -23,8 +23,8 @@ class Json implements ChangelogWriterInterface {
      */
     async write(changelogData:Array<string>, config:Object) {
         fileService.create(
-            `${config.getProjectPath()}/${config.getFilename()}`,
-            data.toJSON()
+            `${config.getProjectPath()}/${config.getFilename()}.${config.getOutputFormat()}`,
+            JSON.stringify(changelogData)
         );
     }
 }

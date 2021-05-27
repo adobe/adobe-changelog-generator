@@ -21,15 +21,22 @@ class Csv implements ChangelogWriterInterface {
      *
      * @param {Array<string>} changelogData
      * @param {Object} config
+     * @param callback
      * @return void
      */
-    async write(changelogData:Array<string>, config:Object) {
+    async write(changelogData:Array<string>, config:Object, callback?:Function) {
         const json2csvParser = new Parser();
         const csv = json2csvParser.parse(JSON.stringify(changelogData));
         fileService.create(
-            `${config.getProjectPath()}/${config.getFilename()}.${config.getOutputFormat()}`,
+            `${config.getProjectPath()}/${config.getFilename()}.csv`,
             csv
         );
+        if (callback) {
+            callback(null, {
+                filename: `${config.getFilename()}.csv`,
+                path: `${config.getProjectPath()}`
+            })
+        }
     }
 }
 

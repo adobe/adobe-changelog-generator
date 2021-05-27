@@ -46,17 +46,31 @@ class Index {
      */
     async generate(namespaceNames?:Array<string>) {
         const localConfig = await this.configLoader.getLocalConfig(this.configPath);
+        const promises = [];
         const namespaceNamesList = namespaceNames && namespaceNames.length ?
             namespaceNames : Object.keys(localConfig);
 
-        for await (const namespaceName of namespaceNamesList) {
+        for (const namespaceName of namespaceNamesList) {
+
             const configOptions = _.merge(
                 await this.configLoader.getRepositoryConfig(namespaceName),
-                localConfig[namespaceName]
+                localConfig[namespaceName],
+                {localConfigPath: this.configPath}
             );
             const config = new Config(configOptions);
             const data = await this.changelogDataGenerator.getChangelogData(namespaceName, config);
-            this.changelogWriterRegistry.get(config.getOutputFormat()).write(data, config);
+            const fileWriter = this.changelogWriterRegistry.get(config.getOutputFormat());
+            promises.push(new Promise((resolve, reject) => {
+                fileWriter.write(
+                    data,
+                    config,
+                    (error, data) => error ?
+                        reject(error) :
+                        resolve({namespace: namespaceName, ...data })
+                );
+            }));
+
+            return promises;
         }
     }
 }

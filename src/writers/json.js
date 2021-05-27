@@ -19,13 +19,21 @@ class Json implements ChangelogWriterInterface {
      *
      * @param {Array<string>} changelogData
      * @param {Object} config
+     * @param callback
      * @return void
      */
-    async write(changelogData:Array<string>, config:Object) {
+    async write(changelogData:Array<string>, config:Object, callback:?Function) {
         fileService.create(
-            `${config.getProjectPath()}/${config.getFilename()}.${config.getOutputFormat()}`,
+            `${config.getProjectPath()}/${config.getFilename()}.json`,
             JSON.stringify(changelogData)
         );
+
+        if (callback) {
+            callback(null, {
+                filename: `${config.getFilename()}.json`,
+                path: `${config.getProjectPath()}`
+            })
+        }
     }
 }
 

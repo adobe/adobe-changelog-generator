@@ -29,6 +29,10 @@ class Config {
         return this.data.loader.name;
     }
 
+    getLocalConfigPath():string {
+        return  this.data.localConfigPath;
+    }
+
     /**
      * @return {string}
      */
@@ -83,7 +87,7 @@ class Config {
      * @return {string}
      */
     getTemplate():string {
-        return _.get(this.data, 'output.template');
+        return _.get(this.data, 'output.template') || 'pullrequest';
     }
 
     /**
@@ -97,7 +101,18 @@ class Config {
      * @return {string}
      */
     getProjectPath():string {
-        return _.get(this.data, 'output.path');
+        let path = '';
+
+        if (!_.get(this.data, 'output.path')) {
+            const splitConfigPath = this.getLocalConfigPath().split('/');
+            let i = 0;
+
+            for (i; i <= splitConfigPath.length-2; i++) {
+                path += splitConfigPath[i] + '/';
+            }
+        }
+
+        return _.get(this.data, 'output.path') || path;
     }
 
     /**

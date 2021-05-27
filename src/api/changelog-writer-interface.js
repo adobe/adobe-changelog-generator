@@ -15,9 +15,11 @@ export interface ChangelogWriterInterface {
      *
      * @param changelogData
      * @param {Object} config
+     * @param callback
      */
     generate(
         changelogData:Array<string>,
-        config:Object
+        config:Object,
+        callback:?Function
     ):void
 }

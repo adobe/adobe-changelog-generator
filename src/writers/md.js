@@ -30,19 +30,33 @@ class Md implements ChangelogWriterInterface {
      *
      * @param {Array<string>} changelogData
      * @param {Object} config
+     * @param callback
      * @return void
      */
-    async write(changelogData:Array<string>, config:Object) {
+    async write(changelogData:Array<string>, config:Object, callback?:Function) {
         const template = templateRegistry.get(config.getTemplate());
         const evaluatedTemplateString = await this.templateEngine.generateByTemplate(template, changelogData);
-        if (config.getOutputStrategy() === 'create') {
-            fileService.create(
-                `${config.getProjectPath()}/${config.getFilename()}.${config.getOutputFormat()}`,
-                evaluatedTemplateString
-            );
-        } else {
-            this.merge(evaluatedTemplateString, config);
+        try {
+            if (config.getOutputStrategy() === 'create') {
+                fileService.create(
+                    `${config.getProjectPath()}/${config.getFilename()}.${config.getOutputFormat()}`,
+                    evaluatedTemplateString
+                );
+            } else {
+                this.merge(evaluatedTemplateString, config);
+            }
+
+            if (callback) {
+                callback(null, {
+                    filename: `${config.getFilename()}.md`,
+                    path: `${config.getProjectPath()}`
+                })
+            }
+
+        } catch (error) {
+            if (callback) callback(error)
         }
+
     }
 
     /**
@@ -87,7 +101,7 @@ class Md implements ChangelogWriterInterface {
         });
 
         fileService.create(
-            `${config.getProjectPath()}/${config.getFilename()}.${config.getOutputFormat()}`,
+            `${config.getProjectPath()}/${config.getFilename()}.md`,
             result
         );
     }

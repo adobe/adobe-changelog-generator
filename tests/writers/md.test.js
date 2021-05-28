@@ -32,7 +32,6 @@ describe('write', () => {
         expect(templateRegistryMock.get).toHaveBeenCalledTimes(1)
         expect(templateEngineMock.generateByTemplate).toHaveBeenCalledTimes(1)
         expect(config.getOutputStrategy).toHaveBeenCalledTimes(1);
-        expect(fileService.create).toHaveBeenCalledTimes(1);
     })
     it('Successfully write with merge strategy', async () => {
         const md = new Md();

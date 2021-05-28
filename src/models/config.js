@@ -29,6 +29,9 @@ class Config {
         return this.data.loader.name;
     }
 
+    /**
+     * @return {string}
+     */
     getLocalConfigPath():string {
         return  this.data.localConfigPath;
     }

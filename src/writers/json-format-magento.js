@@ -15,8 +15,9 @@ const fileService = require('../services/file');
 const GithubNamespaceParser = require('../services/github-namespace-parser');
 
 class JsonFormatMagento implements ChangelogWriterInterface {
-    static extension = 'json';
-
+    /**
+     * Json writter
+     */
     constructor() {
         this.githubNamespaceParser = new GithubNamespaceParser();
     }
@@ -48,11 +49,11 @@ class JsonFormatMagento implements ChangelogWriterInterface {
                     releaseData['pull-requests'][`${data.organization}/${data.repository}/${data.number}`] = {
                         ...data,
                         'user': { login: data.author}
-                    }
-                })
+                    };
+                });
                 resultJSON.push(releaseData);
-            })
-        })
+            });
+        });
 
         fileService.create(
             `${config.getProjectPath()}/${config.getFilename()}.json`,
@@ -63,7 +64,7 @@ class JsonFormatMagento implements ChangelogWriterInterface {
             callback(null, {
                 filename: `${config.getFilename()}.json`,
                 path: `${config.getProjectPath()}`
-            })
+            });
         }
     }
 }

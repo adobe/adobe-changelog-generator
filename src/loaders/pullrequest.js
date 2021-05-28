@@ -87,7 +87,7 @@ class PullRequestLoader implements LoaderInterface {
       }`;
 
   		response = await this.githubGraphQlClient(query);
-  		hasNextPage = response.search.pageInfo.hasNextPage
+  		hasNextPage = response.search.pageInfo.hasNextPage;
   		cursor = response.search.pageInfo.endCursor;
   		result = [...result, ...response.search.nodes];
   	} while (hasNextPage);

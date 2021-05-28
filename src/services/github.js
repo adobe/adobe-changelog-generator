@@ -19,10 +19,14 @@ class Github {
 
     /**
      * @param {string} token
+     * @param {string} url
      */
-    constructor(token:string):void {
-        this.graphqlClient = graphql.defaults({headers: {authorization: `token ${token}`}});
-        this.restClient = new Octokit({auth: `token ${token}`});
+    constructor(token:string, url:string):void {
+        this.graphqlClient = graphql.defaults({headers: {authorization: `token ${token}`},baseUrl:url});
+        this.restClient = new Octokit({
+            auth: `token ${token}`,
+            baseUrl: url
+        });
     }
 
     /**
@@ -71,7 +75,6 @@ class Github {
             cursor = response.repository.refs.pageInfo.endCursor;
             result = [...result, ...response.repository.refs.nodes];
         } while (hasNextPage);
-
         const data = {};
 
         if (filter) {

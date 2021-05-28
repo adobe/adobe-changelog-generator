@@ -32,7 +32,7 @@ class Json implements ChangelogWriterInterface {
             callback(null, {
                 filename: `${config.getFilename()}.json`,
                 path: `${config.getProjectPath()}`
-            })
+            });
         }
     }
 }

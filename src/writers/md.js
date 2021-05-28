@@ -50,11 +50,11 @@ class Md implements ChangelogWriterInterface {
                 callback(null, {
                     filename: `${config.getFilename()}.md`,
                     path: `${config.getProjectPath()}`
-                })
+                });
             }
 
         } catch (error) {
-            if (callback) callback(error)
+            if (callback) callback(error);
         }
 
     }

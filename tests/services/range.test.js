@@ -218,7 +218,7 @@ describe('GetVersions', () => {
             'changelog-generator',
             new Date('2020/05/16'),
             new Date('2021/02/11'),
-            '1.0.2',
+            '1.0.3',
             '1.0.9'
         );
 

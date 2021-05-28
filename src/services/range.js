@@ -60,7 +60,6 @@ class Range {
         for (const Parser of parsers) {
             const parser = new Parser(this.githubService);
             const match = point && point.match(parser.getRegExp());
-
             if (match && direction === 'from') {
                 return parser.getFromDate(org, repo, point, filter);
             }

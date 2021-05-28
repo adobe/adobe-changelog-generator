@@ -25,11 +25,12 @@ class Index {
 
     /**
      * @param {string} githubToken - Github access token
+     * @param {string} githubUrl - Github Url
      * @param {string} configPath - Path to config location
      * @param {string} configPathType - Type of the path (Absolute|Relative)
      */
-    constructor(githubToken:string, configPath?:string, configPathType?:string) {
-        this.githubService = new GithubService(githubToken);
+    constructor(githubToken:string, githubUrl:string, configPath?:string, configPathType?:string) {
+        this.githubService = new GithubService(githubToken, githubUrl);
         this.configLoader = new ConfigLoader(this.githubService);
         this.changelogWriterRegistry = new ChangelogWriterRegistry();
         this.configPath = configPath;

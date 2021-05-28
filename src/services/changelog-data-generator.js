@@ -90,7 +90,6 @@ class ChangelogDataGenerator {
             changelogGenerationTerms.to,
             changelogGenerationTerms.filter
         );
-
         const versionsRange = await this.rangeService.getVersions(
             namespace.organization,
             namespace.repository,

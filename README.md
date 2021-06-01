@@ -3,19 +3,8 @@ Adobe Changelog Generator
 
 **Adobe Changelog Generator**  is the core package that is used to generate a changelog file.
 <!-- toc -->
-
----
-* [Installation](#installation)
+* [Installation and update](#installation)
 * [Commands](#commands)
-* [Configuration](https://github.com/adobe/aio-cli-plugin-changelog/wiki/Configuration)
-* [Template](https://github.com/adobe/aio-cli-plugin-changelog/wiki/Templates)
----
-* [Development installation](https://github.com/adobe/aio-cli-plugin-changelog/wiki/Development-installation)
-* [Extension Points](https://github.com/adobe/aio-cli-plugin-changelog/wiki/Extension-Points)   
----
-* [Maintainers and Contributors](#maintainers-and-Contributors)
-* [Contact Us](#contact-us)  
---- 
 <!-- tocstop -->
 
 ## Technical Requirements
@@ -28,22 +17,38 @@ $ aio plugins:install -g @adobe/aio-cli-plugin-changelog
 $ # OR
 $ aio discover -i
 $ aio changelog --help...
-$ aio config:set GITHUB_TOKEN '<your token>'
-
+$ aio config set <GITHUB_TOKEN>
 ```
+
+### Update
+Please use the latest version of the plugin.   
+Use command `aio plugins` to see plugins that are outdated.  
+Use command `aio plugins:update` for update plugins to latest stable version.  
+
 
 # Commands
 <!-- commands -->
-* [`aio changelog:generate`](#aio-changelog)
+* [`aio changelog:generate`](#aio-changeloggenerate)
 
 ## `aio changelog:generate`
 
-#### Options
+Changelog generation tool
 
-| Long  | Short | Multiple | Description
-| ------------- | ------------- | ------------- | ------------- |
-| `config` | `-c` | false | The path to local machine config |
-| `namespaces` | `-n` |  true | Generate changelog for provided namespaces |
+```
+Changelog generation tool
+
+USAGE
+  $ aio changelog:generate
+
+OPTIONS
+  -c, --config=config          Path to local machine config
+
+  -n, --namespaces=namespaces  [default: ] Generate changelog for specific namespace, example:
+                               organization/repository:branch
+
+EXAMPLE
+  $ aio changelog:generate
+```
 <!-- commandsstop -->
 
 

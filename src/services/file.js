@@ -46,7 +46,12 @@ class File {
      * @param callback
      */
     create(path:string, data:string, callback?:Function):void | Error {
-        return fs.writeFile(path, data, callback ? callback : () => {});
+        fs.writeFile(path, data, (err) => {
+            if (callback) {
+                callback(err, { path });
+            }
+        });
+
     }
 }
 

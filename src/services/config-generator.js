@@ -47,19 +47,25 @@ const sample = {
             },
         }
     }
-}
+};
 
 class ConfigGenerator {
-    generateConfigSample(type:string, path:string): Promise {
+    /**
+     *
+     * @param type
+     * @param path
+     * @return {Promise<T>}
+     */
+    generateConfigSample(type:string, path:string):Promise {
         return new Promise((resolve, reject) => {
             if (!sample[type]) {
-                reject(new Error(`Sample type ${type} does not exist`))
+                reject(new Error(`Sample type ${type} does not exist`));
             }
             fileService.create(path, JSON.stringify(sample[type], null, 4), (error:Error, data:Object) => error ?
                 reject(error) :
                 resolve(data)
             );
-        })
+        });
     }
 }
 

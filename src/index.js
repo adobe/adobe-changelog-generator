@@ -77,6 +77,12 @@ class Index {
         }
     }
 
+    /**
+     *
+     * @param type
+     * @param path
+     * @return {Promise<unknown>}
+     */
     async generateConfigSample(type:string = 'short', path:string = `${process.cwd()}/config.json`):Promise {
         return this.configGenerator.generateConfigSample(type, path);
     }

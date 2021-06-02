@@ -29,6 +29,7 @@ Use command `aio plugins:update` for update plugins to latest stable version.
 # Commands
 <!-- commands -->
 * [`aio changelog:generate`](#aio-changeloggenerate)
+* [`aio changelog:generate-config-sample`](#aio-changeloggenerate-config-sample)
 
 ## `aio changelog:generate`
 
@@ -46,8 +47,22 @@ OPTIONS
   -n, --namespaces=namespaces  [default: ] Generate changelog for specific namespace, example:
                                organization/repository:branch
 
-EXAMPLE
-  $ aio changelog:generate
+```
+
+## `aio changelog:generate-config-sample`
+
+```
+USAGE
+  $ aio changelog:generate-config-sample
+
+OPTIONS
+  -t, --type=short|long        [default: Short] Type of generated config. 
+                                    Short - minimum required configuration for application.
+                                    Long - config with all possible parameters  
+
+  -p, --path=path              [default: <directory from which app was executed>/config.json] 
+                                    Path to generated config sample.
+
 ```
 <!-- commandsstop -->
 

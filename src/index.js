@@ -15,6 +15,7 @@ const ChangelogDataGenerator = require("./services/changelog-data-generator");
 const ChangelogWriterRegistry = require('./services/changelog-writer-registry');
 const GithubService = require('./services/github');
 const Config = require('./models/config');
+const ConfigGenerator = require('./services/config-generator');
 
 class Index {
     githubService:Object
@@ -22,6 +23,7 @@ class Index {
     configPath:string
     configPathType:string
     changelogDataGenerator:Object
+    configGenerator:Object
 
     /**
      * @param {string} githubToken - Github access token
@@ -35,6 +37,7 @@ class Index {
         this.changelogWriterRegistry = new ChangelogWriterRegistry();
         this.configPath = configPath;
         this.configPathType = configPathType;
+        this.configGenerator = new ConfigGenerator();
         this.changelogDataGenerator = new ChangelogDataGenerator(this.githubService);
         global.__basedir = __dirname;
     }
@@ -52,7 +55,6 @@ class Index {
             namespaceNames : Object.keys(localConfig);
 
         for (const namespaceName of namespaceNamesList) {
-
             const configOptions = _.merge(
                 await this.configLoader.getRepositoryConfig(namespaceName),
                 localConfig[namespaceName],
@@ -73,6 +75,10 @@ class Index {
 
             return promises;
         }
+    }
+
+    async generateConfigSample(type:string = 'short', path:string = `${process.cwd()}/config.json`):Promise {
+        return this.configGenerator.generateConfigSample(type, path);
     }
 }
 

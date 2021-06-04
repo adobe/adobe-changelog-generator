@@ -14,8 +14,9 @@ Adobe Changelog Generator
 # Installation
 ```
 $ aio plugins:install -g @adobe/aio-cli-plugin-changelog
-$ # OR
+# OR
 $ aio discover -i
+
 $ aio changelog --help...
 $ aio config set <GITHUB_TOKEN>
 ```

@@ -13,7 +13,7 @@ Adobe Changelog Generator
 
 # Installation
 ```
-$ aio plugins:install -g @adobe/aio-cli-plugin-changelog
+$ aio plugins:install @adobe/aio-cli-plugin-changelog
 # OR
 $ aio discover -i
 

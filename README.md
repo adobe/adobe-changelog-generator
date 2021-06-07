@@ -18,7 +18,7 @@ $ aio plugins:install @adobe/aio-cli-plugin-changelog
 $ aio discover -i
 
 $ aio changelog --help...
-$ aio config set <GITHUB_TOKEN>
+$ aio config:set GITHUB_TOKEN=<personal access token>
 ```
 
 ## Update

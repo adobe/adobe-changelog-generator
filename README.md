@@ -13,17 +13,18 @@ Adobe Changelog Generator
 
 # Installation
 ```
-$ aio plugins:install -g @adobe/aio-cli-plugin-changelog
-$ # OR
+$ aio plugins:install @adobe/aio-cli-plugin-changelog
+# OR
 $ aio discover -i
+
 $ aio changelog --help...
-$ aio config set <GITHUB_TOKEN>
+$ aio config:set GITHUB_TOKEN=<personal access token>
 ```
 
-### Update
+## Update
 Please use the latest version of the plugin.   
-Use command `aio plugins` to see plugins that are outdated.  
-Use command `aio plugins:update` for update plugins to latest stable version.  
+Use command `aio plugins` to see outdated plugins.  
+Use command `aio plugins:update` for update plugins to the latest stable version. 
 
 
 # Commands
@@ -42,7 +43,7 @@ USAGE
   $ aio changelog:generate
 
 OPTIONS
-  -c, --config=config          Path to local machine config
+  -c, --config=config          Path to the configuration located on your local machine
 
   -n, --namespaces=namespaces  [default: ] Generate changelog for specific namespace, example:
                                organization/repository:branch

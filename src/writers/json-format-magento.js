@@ -45,6 +45,11 @@ class JsonFormatMagento implements ChangelogWriterInterface {
                     },
                     'pull-requests': {}
                 };
+
+                if (!changelogData[namespace][release].data) {
+                    changelogData[namespace][release].data = [];
+                }
+
                 changelogData[namespace][release].data.forEach((data:Object) => {
                     releaseData['pull-requests'][`${data.organization}/${data.repository}/${data.number}`] = {
                         ...data,

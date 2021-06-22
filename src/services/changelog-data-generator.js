@@ -126,11 +126,10 @@ class ChangelogDataGenerator {
     mapDataToVersionsMapping(data:Array<Object>, versionsRange:Object):Object {
         data.forEach((item:Object) => {
             const version = _.findKey(versionsRange, (versionRange:Object, versionName:string) => {
-                const mergedAtTimestamp = (new Date(item.mergedAt)).getTime();
+                const mergedAtTimestamp = (new Date(item.mergedAt)).getTime() || (new Date(item.closedAt)).getTime();
                 const fromTimestamp = (new Date(versionRange.from)).getTime();
                 const toTimestamp = (new Date(versionRange.to)).getTime();
-                const res = mergedAtTimestamp > fromTimestamp && mergedAtTimestamp < toTimestamp;
-                return mergedAtTimestamp > fromTimestamp && mergedAtTimestamp < toTimestamp;
+                return mergedAtTimestamp >= fromTimestamp && mergedAtTimestamp <= toTimestamp;
             });
 
             if (!versionsRange[version].data) {

@@ -51,7 +51,7 @@ class PullRequestLoader implements LoaderInterface {
   	do {
   		after = cursor ? `after:"${cursor}"` : '';
   		query = `{
-        search(first: 50, query: "repo:${organization}/${repository} is:pr base:${branch} is:merged merged:${startDate}..${endDate}", type: ISSUE ${after}) {
+        search(first: 25, query: "repo:${organization}/${repository} is:pr base:${branch} is:merged merged:${startDate}..${endDate}", type: ISSUE ${after}) {
           nodes {
             ... on PullRequest {
               title
@@ -63,6 +63,35 @@ class PullRequestLoader implements LoaderInterface {
               labels(first: 100) {
                 nodes {
                   name
+                }
+              }
+              timelineItems(first: 100 itemTypes: [
+                CROSS_REFERENCED_EVENT
+              ]) {
+                edges {
+                  node {
+                    ... on CrossReferencedEvent {
+                      source {
+                        ... on Issue {
+                          title
+                          url
+                          state
+                          number
+                          createdAt
+                          closedAt
+                          author {
+                            login
+                          }
+                          repository {
+                            name
+                            owner {
+                              login
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
               author {
@@ -107,11 +136,23 @@ class PullRequestLoader implements LoaderInterface {
   		organization,
   		title: item.title,
   		url: item.url,
-        author: item.author ? item.author.login : 'ghost',
+          author: item.author ? item.author.login : 'ghost',
   		labels: item.labels.nodes,
+          additionalFields: {},
+          type: 'pullrequest',
+          crossreference: item.timelineItems.edges.length ? item.timelineItems.edges.filter((elem:Object) =>
+              elem.node.source.repository
+          ).map((elem:Object) => ({
+              type: 'issue',
+              repository: elem.node.source.repository.name,
+              organization: elem.node.source.repository.owner.login,
+              number: elem.node.source.number,
+              login: elem.node.source.author ? elem.node.source.author.login : 'ghost',
+              state: elem.node.source.state
+          })) : [],
   		createdAt: item.createdAt,
-        closedAt: item.closedAt,
-        mergedAt: item.mergedAt,
+          closedAt: item.closedAt,
+          mergedAt: item.mergedAt,
   		contributionType: item.contributionType,
   		number: item.number
   	}));

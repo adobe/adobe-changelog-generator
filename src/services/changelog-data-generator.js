@@ -16,7 +16,8 @@ const GithubService = require('./github');
 const asyncService = require('./async');
 const GroupRegistry = require('./group-registry');
 const LoaderRegistry = require('./loader-registry');
-const filterManager = require('../filter-manager');
+const ProcessorRegistry = require('./processor-registry');
+const FilterRegistry = require('./filter-registry');
 const RangeService = require("./range");
 const GithubNamespaceParser = require("./github-namespace-parser");
 const ChangelogGenerationTermsParser = require("./changelog-generation-terms-parser");
@@ -36,6 +37,8 @@ class ChangelogDataGenerator {
         this.githubNamespaceParser = new GithubNamespaceParser();
         this.groupRegistry = new GroupRegistry();
         this.loaderRegistry = new LoaderRegistry();
+        this.processorRegistry = new ProcessorRegistry();
+        this.filterRegistry = new FilterRegistry();
         this.changelogGenerationTermsParser = new ChangelogGenerationTermsParser();
     }
 
@@ -52,6 +55,7 @@ class ChangelogDataGenerator {
             await this.groupRegistry.get(config.getGroupName(), config.getGroupConfig()) :
             null;
         const filters = await this.getFilters(config);
+        const processors = await this.getProcessors(config);
         return await asyncService.mapValuesAsync(
             {[namespaceName]: config.getReleaseLine(), ...config.getCombine()},
             (releaseLine, namespaceName) => this.collectData(
@@ -59,7 +63,8 @@ class ChangelogDataGenerator {
                 releaseLine,
                 loader,
                 groupBy,
-                filters
+                filters,
+                processors
             )
         );
     }
@@ -72,6 +77,7 @@ class ChangelogDataGenerator {
      * @param {Object} loader - Data loader
      * @param {Object|null} groupBy - Groups data
      * @param {Array<Object>|null} filters - Filters data
+     * @param {Array<Object>|null} processors
      * @return {Promise<Object>}
      */
     async collectData(
@@ -79,7 +85,8 @@ class ChangelogDataGenerator {
         termsLine:string,
         loader:LoaderInterface,
         groupBy?:Object,
-        filters?:Array<FilterInterface>
+        filters?:Array<FilterInterface>,
+        processors?:Array<Object>
     ):Array<Object> {
         const namespace = this.githubNamespaceParser.parse(namespaceName);
         const changelogGenerationTerms = this.changelogGenerationTermsParser.parse(termsLine);
@@ -106,6 +113,10 @@ class ChangelogDataGenerator {
             timeRange.to
         );
 
+        if (processors && processors.length) {
+            data = await this.applyProcessors(data, processors);
+        }
+
         if (filters && filters.length) {
             data = await this.applyFilters(data, filters);
         }
@@ -114,6 +125,18 @@ class ChangelogDataGenerator {
         }
 
         return this.mapDataToVersionsMapping(data, versionsRange);
+    }
+
+    /**
+     * @param data
+     * @param processors
+     * @return {Promise<Array<Object>>}
+     */
+    async applyProcessors(data:Array<Object>, processors:Array<Object>) {
+        for (const processor of processors) {
+            data = await processor.execute(data);
+        }
+        return data;
     }
 
     /**
@@ -148,9 +171,17 @@ class ChangelogDataGenerator {
      * @return {Promise<Object>}
      */
     async getFilters(sharedConfig:Object) {
-    	const filterNames:Array<string> = sharedConfig.getFilterNames();
-    	const filterClasses:Object = filterManager.get(filterNames);
-    	return filterNames.map((name:string) => new filterClasses[name](sharedConfig.getFilter(name)));
+    	return await asyncService.mapAsync(sharedConfig.getFilters(), (filter:Object) =>
+            this.filterRegistry.get(filter.name, filter));
+    }
+
+    /**
+     * @param sharedConfig
+     * @return {Promise<Array>}
+     */
+    async getProcessors(sharedConfig:Object):Array<Object> {
+        return await asyncService.mapAsync(sharedConfig.getProcessors(), (processor:Object) =>
+            this.processorRegistry.get(processor.name, processor));
     }
 
     /**

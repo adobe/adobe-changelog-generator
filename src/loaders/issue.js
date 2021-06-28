@@ -58,6 +58,11 @@ class IssueLoader implements LoaderInterface {
               number
               title
               url
+              labels(first: 100) {
+                nodes {
+                  name
+                }
+              }
               author {
                 login
               }
@@ -71,8 +76,16 @@ class IssueLoader implements LoaderInterface {
                     ... on CrossReferencedEvent {
                       source {
                         ... on PullRequest {
+                          title
+                          url
                           number
-                          merged
+                          createdAt
+                          closedAt
+                          mergedAt
+                          state
+                          author {
+                            login
+                          }
                           repository {
                             name
                             owner {
@@ -107,18 +120,22 @@ class IssueLoader implements LoaderInterface {
   		url: item.url,
   		author: item.author ? item.author.login : 'ghost',
   		createdAt: item.createdAt,
-        closedAt: item.closedAt,
+          closedAt: item.closedAt,
   		number: item.number,
-        mergedAt: item.mergedAt,
-        crossreference: item.timelineItems.edges.length ? item.timelineItems.edges.filter((elem:Object) =>
-            elem.node.source.repository
-        ).map((elem:Object) => ({
-            repository: elem.node.source.repository.name,
-            organization: elem.node.source.repository.owner.login,
-            number: elem.node.source.number,
-            merged: elem.node.source.merged
-        })) : [],
-        closer: _.get(item, 'timelineItems.edges[0].node.closer')
+          labels: item.labels.nodes,
+          mergedAt: item.mergedAt,
+          additionalFields: {},
+          type: 'issue',
+          crossreference: item.timelineItems.edges.length ? item.timelineItems.edges.filter((elem:Object) =>
+              elem.node.source.repository
+          ).map((elem:Object) => ({
+              repository: elem.node.source.repository.name,
+              organization: elem.node.source.repository.owner.login,
+              number: elem.node.source.number,
+              type: 'pullrequest',
+              state: elem.node.source.state
+          })) : [],
+          closer: _.get(item, 'timelineItems.edges[0].node.closer')
   	}));
   }
 }

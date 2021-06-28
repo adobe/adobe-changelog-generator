@@ -43,6 +43,8 @@ module.exports = (async () => {
                 'writers',
                 'groups',
                 'loaders',
+                'filters',
+                'processors',
             ])
         },
         stats: {

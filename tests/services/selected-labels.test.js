@@ -14,7 +14,7 @@ describe('Check "execute"', () => {
         const selectedLabels = new SelectedLabels({
             "name": "selected-labels",
             "field": "components",
-            "componentLabelRegExp": "(Component:)(.*)"
+            "labelRegExp": "(Component:)(.*)"
         });
         expect(await selectedLabels.execute(data)).toStrictEqual([
             {

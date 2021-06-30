@@ -22,9 +22,9 @@ class SelectedLabels {
      * @return {Promise<Object[]>}
      */
     async execute(data:Array<Object>) {
-        if (!this.config.componentLabelRegExp) {
+        if (!this.config.labelRegExp) {
             throw new Error(
-                '"selected-labels" processor error: required option "componentLabelRegExp" is not provided'
+                '"selected-labels" processor error: required option "labelRegExp" is not provided'
             );
         }
 
@@ -32,7 +32,7 @@ class SelectedLabels {
             if (item.labels) {
                 item.additionalFields[this.config.field] = item.labels
                     .map((label:Object) => label.name)
-                    .filter((label:string) => !!label.match(this.config.componentLabelRegExp));
+                    .filter((label:string) => !!label.match(this.config.labelRegExp));
             }
 
             return item;

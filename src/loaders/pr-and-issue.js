@@ -21,12 +21,12 @@ const IssueLoader = require('./issue');
  * Class is responsible for loading issue and pull request data from Github
  */
 class PrAndIssue implements LoaderInterface {
-    githubGraphQlClient: graphql
+    githubGraphQlClient:graphql
 
     /**
      * @param githubService
      */
-    constructor(githubService: graphql) {
+    constructor(githubService:graphql) {
         this.pullrequestLoader = new PullrequestLoader(githubService);
         this.issueLoader = new IssueLoader(githubService);
     }
@@ -42,12 +42,12 @@ class PrAndIssue implements LoaderInterface {
      * @return {Promise<{createdAt: Object.createdAt, contributionType: Object.contributionType, number: Object.number, author: Object.author.login, organization: string, repository: string, title: Object.title, url: Object.url, labels: Object.labels.nodes}[]>}
      */
     async execute(
-        organization: string,
-        repository: string,
+        organization:string,
+        repository:string,
         branch,
-        from: Date,
-        to: Date
-    ): Promise<Array<PullRequestData>> {
+        from:Date,
+        to:Date
+    ):Promise<Array<PullRequestData>> {
         const prs = await this.pullrequestLoader.execute(organization, repository, branch, from, to);
         const issues = await this.issueLoader.execute(organization, repository, branch, from, to);
         return [...prs, ...issues];

@@ -15,7 +15,7 @@ import type { PullRequestData } from '../models/pullrequest.js';
 const _ = require('lodash');
 const FilterConditionService = require('../services/filter-condition');
 
-class Index implements FilterInterface {
+class Base implements FilterInterface {
     /**
      *
      * @param config
@@ -47,4 +47,4 @@ class Index implements FilterInterface {
     }
 }
 
-module.exports = Index;
+module.exports = Base;

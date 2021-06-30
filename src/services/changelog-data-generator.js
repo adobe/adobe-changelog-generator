@@ -14,10 +14,10 @@ import type {FilterInterface} from '../api/filter-interface';
 const _ = require('lodash');
 const GithubService = require('./github');
 const asyncService = require('./async');
-const GroupRegistry = require('./group-registry');
-const LoaderRegistry = require('./loader-registry');
-const ProcessorRegistry = require('./processor-registry');
-const FilterRegistry = require('./filter-registry');
+const GroupFactory = require('./group-factory');
+const LoaderFactory = require('./loader-factory');
+const ProcessorFactory = require('./processor-factory');
+const FilterFactory = require('./filter-factory');
 const RangeService = require("./range");
 const GithubNamespaceParser = require("./github-namespace-parser");
 const ChangelogGenerationTermsParser = require("./changelog-generation-terms-parser");
@@ -35,10 +35,10 @@ class ChangelogDataGenerator {
         this.githubService = githubService;
         this.rangeService = new RangeService(this.githubService);
         this.githubNamespaceParser = new GithubNamespaceParser();
-        this.groupRegistry = new GroupRegistry();
-        this.loaderRegistry = new LoaderRegistry();
-        this.processorRegistry = new ProcessorRegistry();
-        this.filterRegistry = new FilterRegistry();
+        this.groupFactory = new GroupFactory();
+        this.loaderFactory = new LoaderFactory();
+        this.processorFactory = new ProcessorFactory();
+        this.filterFactory = new FilterFactory();
         this.changelogGenerationTermsParser = new ChangelogGenerationTermsParser();
     }
 
@@ -50,9 +50,9 @@ class ChangelogDataGenerator {
      * @return {Object}
      */
     async getChangelogData(namespaceName:string, config:Object) {
-        const loader:LoaderInterface = await this.loaderRegistry.get(config.getLoaderName(), this.githubService);
+        const loader:LoaderInterface = await this.loaderFactory.get(config.getLoaderName(), this.githubService);
         const groupBy = config.getGroupName() ?
-            await this.groupRegistry.get(config.getGroupName(), config.getGroupConfig()) :
+            await this.groupFactory.get(config.getGroupName(), config.getGroupConfig()) :
             null;
         const filters = await this.getFilters(config);
         const processors = await this.getProcessors(config);
@@ -172,7 +172,7 @@ class ChangelogDataGenerator {
      */
     async getFilters(sharedConfig:Object) {
     	return await asyncService.mapAsync(sharedConfig.getFilters(), (filter:Object) =>
-            this.filterRegistry.get(filter.name, filter));
+            this.filterFactory.get(filter.name, filter));
     }
 
     /**
@@ -181,7 +181,7 @@ class ChangelogDataGenerator {
      */
     async getProcessors(sharedConfig:Object):Array<Object> {
         return await asyncService.mapAsync(sharedConfig.getProcessors(), (processor:Object) =>
-            this.processorRegistry.get(processor.name, processor));
+            this.processorFactory.get(processor.name, processor));
     }
 
     /**

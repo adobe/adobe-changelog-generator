@@ -14,6 +14,9 @@ import type { PullRequestData } from '../models/pullrequest.js';
 import type { graphql } from '@octokit/graphql';
 const _ = require('lodash');
 
+/**
+ * Class is responsible for loading issue data from Github
+ */
 class IssueLoader implements LoaderInterface {
   githubGraphQlClient:graphql
 

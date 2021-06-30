@@ -12,7 +12,7 @@ governing permissions and limitations under the License.
 const DynamicFilesLoader = require('./dynamic-files-loader');
 const CaseConvertor = require('./case-convertor');
 
-class FilterRegistry {
+class ChangelogWriterFactory {
     dynamicFilesLoader:Object;
     caseConvertor:Object;
 
@@ -20,21 +20,20 @@ class FilterRegistry {
      * @constructor
      */
     constructor() {
-        this.dynamicFilesLoader = new DynamicFilesLoader('filters');
+        this.dynamicFilesLoader = new DynamicFilesLoader('writers');
         this.caseConvertor = new CaseConvertor();
     }
 
     /**
-     * Loads filter by name
+     * Loads changelog writer by name
      *
      * @param name
-     * @param config
      * @return {Promise<Object|null>}
      */
-    get(name:string = 'index', config:Object):Function {
-        const Filter = this.dynamicFilesLoader.get(this.caseConvertor.convertPascalToDash(name));
-        return new Filter(config);
+    get(name:string):Function {
+        const Writer = this.dynamicFilesLoader.get(this.caseConvertor.convertPascalToDash(name));
+        return new Writer();
     }
 }
 
-module.exports = FilterRegistry;
+module.exports = ChangelogWriterFactory;

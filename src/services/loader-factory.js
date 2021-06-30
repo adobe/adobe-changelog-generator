@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 const DynamicFilesLoader = require('./dynamic-files-loader');
 const CaseConvertor = require('./case-convertor');
 
-class ProcessorRegistry {
+class LoaderFactory {
     dynamicFilesLoader:Object
     caseConvertor:Object
 
@@ -19,7 +19,7 @@ class ProcessorRegistry {
      * @constructor
      */
     constructor() {
-        this.dynamicFilesLoader = new DynamicFilesLoader('processors');
+        this.dynamicFilesLoader = new DynamicFilesLoader('loaders');
         this.caseConvertor = new CaseConvertor();
     }
 
@@ -27,13 +27,13 @@ class ProcessorRegistry {
      * Loads loader by name
      *
      * @param name
-     * @param config
+     * @param {{graphql}} githubService TODO: should be removed from parameters
      * @return {Promise<Object|null>}
      */
-    get(name:string, config:Object):Function {
-        const Processor = this.dynamicFilesLoader.get(this.caseConvertor.convertPascalToDash(name));
-        return new Processor(config);
+    get(name:string, githubService:Object):Function {
+        const Loader = this.dynamicFilesLoader.get(this.caseConvertor.convertPascalToDash(name));
+        return new Loader(githubService);
     }
 }
 
-module.exports = ProcessorRegistry;
+module.exports = LoaderFactory;

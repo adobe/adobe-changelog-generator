@@ -24,7 +24,7 @@ class SelectedLabels {
     async execute(data:Array<Object>) {
         if (!this.config.componentLabelRegExp) {
             throw new Error(
-                'MagentoComponentLabels config error: required option "componentLabelRegExp" is not provided'
+                '"selected-labels" processor error: required option "componentLabelRegExp" is not provided'
             );
         }
 

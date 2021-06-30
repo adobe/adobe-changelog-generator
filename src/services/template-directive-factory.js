@@ -14,7 +14,7 @@ const DynamicFilesLoader = require('./dynamic-files-loader');
 const CaseConvertor = require('./case-convertor');
 const _ = require('lodash');
 
-class TemplateDirectiveRegistry {
+class TemplateDirectiveFactory {
     caseConvertor:Object;
     dynamicFilesLoader:Object;
 
@@ -52,4 +52,4 @@ class TemplateDirectiveRegistry {
     }
 }
 
-module.exports = TemplateDirectiveRegistry;
+module.exports = TemplateDirectiveFactory;

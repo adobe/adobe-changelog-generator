@@ -9,25 +9,13 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-import type { FilterInterface } from '../api/filter-interface.js';
-import type { PullRequestData } from '../models/pullrequest.js';
-
-const _ = require('lodash');
-
-class Index implements FilterInterface {
+class FilterCondition {
     /**
-     *
-     * @param config
-     */
-    constructor(config) {
-        this.config = config;
-    }
-
-    /**
+     * Map config conditions to executable code
      *
      * @param value
      * @param config
-     * @return {boolean|*}
+     * @return {boolean}
      */
     getCondition(value, config) {
         switch (config.condition) {
@@ -45,36 +33,21 @@ class Index implements FilterInterface {
 
                 return value !== config.value;
             }
-            case 'in': return _.includes(config.value, value);
-            case 'not in': return !_.includes(config.value, value);
+            case 'in':
+                return _.includes(config.value, value);
+            case 'not in':
+                return !_.includes(config.value, value);
+            default:
+                throw new Error(`Condition ${config.condition} is not supported`);
         }
-    }
-    /**
-     * Filters data by specific labels
-     *
-     * @param data
-     * @return {Array<PullRequestData>|PullRequestData[]}
-     */
-    execute (data:Array<PullRequestData>):Array<PullRequestData> {
-        const conditions = _.isArray(this.config.conditions[0]) ?
-            this.config.conditions :
-            [this.config.conditions];
-
-
-        if (this.config.level) {
-            data.forEach((elem:Object) => elem[this.config.level] = elem[this.config.level]
-                .filter((item:Object) => this.isSatisfyingOrConditions(item, conditions)));
-        } else {
-            data = data.filter((item:Object) => this.isSatisfyingOrConditions(item, conditions));
-        }
-        return data;
     }
 
     /**
+     * Check is "OR" condition satisfied
      *
      * @param item
      * @param conditions
-     * @return {*}
+     * @return Boolean
      */
     isSatisfyingOrConditions(item:Object, conditions:Array):Boolean {
         const result = [];
@@ -83,10 +56,11 @@ class Index implements FilterInterface {
     }
 
     /**
+     * Check is "AND" condition satisfied
      *
      * @param item
      * @param conditions
-     * @return {*}
+     * @return Boolean
      */
     isSatisfyingAndConditions(item:Object, conditions:Array):Boolean {
         const result = [];
@@ -95,4 +69,4 @@ class Index implements FilterInterface {
     }
 }
 
-module.exports = Index;
+module.exports = FilterCondition;

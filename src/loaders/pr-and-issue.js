@@ -16,6 +16,9 @@ const _ = require('lodash');
 const PullrequestLoader = require('./pullrequest');
 const IssueLoader = require('./issue');
 
+/**
+ * Class is responsible for loading issue and pull request data from Github
+ */
 class PrAndIssue implements LoaderInterface {
   githubGraphQlClient:graphql
 

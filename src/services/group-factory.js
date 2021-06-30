@@ -8,32 +8,33 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
+
 const DynamicFilesLoader = require('./dynamic-files-loader');
 const CaseConvertor = require('./case-convertor');
 
-class LoaderRegistry {
-    dynamicFilesLoader:Object
-    caseConvertor:Object
+class GroupFactory {
+    dynamicFilesLoader:Object;
+    caseConvertor:Object;
 
     /**
      * @constructor
      */
     constructor() {
-        this.dynamicFilesLoader = new DynamicFilesLoader('loaders');
+        this.dynamicFilesLoader = new DynamicFilesLoader('groups');
         this.caseConvertor = new CaseConvertor();
     }
 
     /**
-     * Loads loader by name
+     * Loads group by name
      *
      * @param name
-     * @param {{graphql}} githubService TODO: should be removed from parameters
+     * @param config
      * @return {Promise<Object|null>}
      */
-    get(name:string, githubService:Object):Function {
-        const Loader = this.dynamicFilesLoader.get(this.caseConvertor.convertPascalToDash(name));
-        return new Loader(githubService);
+    get(name:string, config:Object):Function {
+        const Group = this.dynamicFilesLoader.get(this.caseConvertor.convertPascalToDash(name));
+        return new Group(config);
     }
 }
 
-module.exports = LoaderRegistry;
+module.exports = GroupFactory;

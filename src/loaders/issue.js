@@ -12,8 +12,12 @@ governing permissions and limitations under the License.
 import type { LoaderInterface } from '../api/loader-interface.js';
 import type { PullRequestData } from '../models/pullrequest.js';
 import type { graphql } from '@octokit/graphql';
+const _ = require('lodash');
 
-class PullRequestLoader implements LoaderInterface {
+/**
+ * Class is responsible for loading issue data from Github
+ */
+class IssueLoader implements LoaderInterface {
   githubGraphQlClient:graphql
 
   /**
@@ -51,20 +55,22 @@ class PullRequestLoader implements LoaderInterface {
   	do {
   		after = cursor ? `after:"${cursor}"` : '';
   		query = `{
-        search(first: 25, query: "repo:${organization}/${repository} is:pr base:${branch} is:merged merged:${startDate}..${endDate}", type: ISSUE ${after}) {
+        search(first: 50, query: "repo:${organization}/${repository} is:issue is:closed closed:${startDate}..${endDate}", type: ISSUE ${after}) {
           nodes {
-            ... on PullRequest {
+            ... on Issue {
+              number
               title
               url
-              number
-              createdAt
-              closedAt
-              mergedAt
               labels(first: 100) {
                 nodes {
                   name
                 }
               }
+              author {
+                login
+              }
+              createdAt
+              closedAt
               timelineItems(first: 100 itemTypes: [
                 CROSS_REFERENCED_EVENT
               ]) {
@@ -72,13 +78,14 @@ class PullRequestLoader implements LoaderInterface {
                   node {
                     ... on CrossReferencedEvent {
                       source {
-                        ... on Issue {
+                        ... on PullRequest {
                           title
                           url
-                          state
                           number
                           createdAt
                           closedAt
+                          mergedAt
+                          state
                           author {
                             login
                           }
@@ -92,29 +99,16 @@ class PullRequestLoader implements LoaderInterface {
                       }
                     }
                   }
-                }
-              }
-              author {
-                login
-                ... on User {
-                  id
-                  company
-                  __typename
-                }
-                ... on Bot {
-                  id
-                  login
-                  __typename
-                }
               }
             }
           }
-          pageInfo {
-            hasNextPage
-            endCursor
-          }
         }
-      }`;
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }`;
 
   		response = await this.githubGraphQlClient(query);
   		hasNextPage = response.search.pageInfo.hasNextPage;
@@ -122,40 +116,30 @@ class PullRequestLoader implements LoaderInterface {
   		result = [...result, ...response.search.nodes];
   	} while (hasNextPage);
 
-  	const regexpFirst = /\[bot\]/gm;
-  	const regexpSecond = /(-|^)bot(-|$)/gm;
-  	const regexpThird = /dependabot/gm;
-  	result = result.filter((pr) => pr.author &&
-        pr.author.login.search(regexpFirst) === -1 &&
-        pr.author.login.search(regexpSecond) === -1 &&
-        pr.author.login.search(regexpThird) === -1
-  	);
-
   	return result.map((item:Object) => ({
   		repository,
   		organization,
   		title: item.title,
   		url: item.url,
-          author: item.author ? item.author.login : 'ghost',
-  		labels: item.labels.nodes,
+  		author: item.author ? item.author.login : 'ghost',
+  		createdAt: item.createdAt,
+          closedAt: item.closedAt,
+  		number: item.number,
+          labels: item.labels.nodes,
+          mergedAt: item.mergedAt,
           additionalFields: {},
-          type: 'pullrequest',
+          type: 'issue',
           crossreference: item.timelineItems.edges.length ? item.timelineItems.edges.filter((elem:Object) =>
               elem.node.source.repository
           ).map((elem:Object) => ({
-              type: 'issue',
               repository: elem.node.source.repository.name,
               organization: elem.node.source.repository.owner.login,
               number: elem.node.source.number,
-              login: elem.node.source.author ? elem.node.source.author.login : 'ghost',
+              type: 'pullrequest',
               state: elem.node.source.state
           })) : [],
-  		createdAt: item.createdAt,
-          closedAt: item.closedAt,
-          mergedAt: item.mergedAt,
-  		contributionType: item.contributionType,
-  		number: item.number
+          closer: _.get(item, 'timelineItems.edges[0].node.closer')
   	}));
   }
 }
-module.exports = PullRequestLoader;
+module.exports = IssueLoader;

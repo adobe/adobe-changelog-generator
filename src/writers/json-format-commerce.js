@@ -43,13 +43,32 @@ class JsonFormatMagento implements ChangelogWriterInterface {
                         "end_date": changelogData[namespace][release].to,
                         "base_ref": [parsedNamespace.branch]
                     },
-                    'pull-requests': {}
+                    'pull-requests': {},
+                    'issues': {}
                 };
+
+                if (!changelogData[namespace][release].data) {
+                    changelogData[namespace][release].data = [];
+                }
                 changelogData[namespace][release].data.forEach((data:Object) => {
-                    releaseData['pull-requests'][`${data.organization}/${data.repository}/${data.number}`] = {
-                        ...data,
-                        'user': { login: data.author}
-                    };
+                    if (data.type === 'pullrequest') {
+                        const issues = {};
+                        data.crossreference.forEach((item:Object) => issues[item.number] = item);
+                        releaseData['pull-requests'][`${data.organization}/${data.repository}/${data.number}`] = {
+                            ...data,
+                            'user': { login: data.author},
+                            issues
+                        };
+                    }
+                    if (data.type === 'issue') {
+                        const prs = {};
+                        data.crossreference.forEach((item:Object) => prs[item.number] = item);
+                        releaseData['issues'][`${data.organization}/${data.repository}/${data.number}`] = {
+                            ...data,
+                            'user': { login: data.author},
+                            'pull_requests': prs
+                        };
+                    }
                 });
                 resultJSON.push(releaseData);
             });

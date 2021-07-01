@@ -12,14 +12,17 @@ governing permissions and limitations under the License.
 import type { FilterInterface } from '../api/filter-interface.js';
 import type { PullRequestData } from '../models/pullrequest.js';
 
-class LabelsFilter implements FilterInterface {
-    labels:Array<string>
+const _ = require('lodash');
+const FilterConditionService = require('../services/filter-condition');
 
+class Base implements FilterInterface {
     /**
-     * @param {string} labels
+     *
+     * @param config
      */
-    constructor (labels:Array<string>) {
-    	this.labels = labels;
+    constructor(config) {
+        this.config = config;
+        this.filterConditionService = new FilterConditionService();
     }
 
     /**
@@ -29,22 +32,19 @@ class LabelsFilter implements FilterInterface {
      * @return {Array<PullRequestData>|PullRequestData[]}
      */
     execute (data:Array<PullRequestData>):Array<PullRequestData> {
-    	if (!this.labels.length) {
-    		return data;
-    	}
-    	return data.filter((item:PullRequestData) => {
-    		if (!item.labels) {
-    			return true;
-    		}
+        const conditions = _.isArray(this.config.conditions[0]) ?
+            this.config.conditions :
+            [this.config.conditions];
 
-    		for (let i = 0; i < this.labels.length; i++) {
-    			if (item.labels.map(labelItem => labelItem.name).includes(this.labels[i])) {
-    				return false;
-    			}
-    		}
-    		return true;
-    	});
+
+        if (this.config.level) {
+            data.forEach((elem:Object) => elem[this.config.level] = elem[this.config.level]
+                .filter((item:Object) => this.filterConditionService.isSatisfyingOrConditions(item, conditions)));
+        } else {
+            data = data.filter((item:Object) => this.filterConditionService.isSatisfyingOrConditions(item, conditions));
+        }
+        return data;
     }
 }
 
-module.exports = LabelsFilter;
+module.exports = Base;

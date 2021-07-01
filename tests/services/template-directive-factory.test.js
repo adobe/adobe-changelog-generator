@@ -1,4 +1,4 @@
-const TemplateDirectiveRegistry = require('../../src/services/template-directive-registry');
+const TemplateDirectiveFactory = require('../../src/services/template-directive-factory');
 const DynamicFilesLoader = require('../../src/services/dynamic-files-loader');
 const CaseConvertor = require('../../src/services/case-convertor');
 const dynamicFilesLoaderMock = require('../mocks/dynamic-files-loader');
@@ -13,7 +13,7 @@ CaseConvertor.mockImplementation(() => ({
     convertPascalToDash: caseConvertorMock.convertPascalToDash,
     convertPascalToUnderscore: caseConvertorMock.convertPascalToUnderscore
 }));
-const templateDirectiveRegistry = new TemplateDirectiveRegistry();
+const templateDirectiveFactory = new TemplateDirectiveFactory();
 
 describe('getAll', () => {
     beforeEach(() => {
@@ -22,7 +22,7 @@ describe('getAll', () => {
     });
 
     it('Successfully loading all template directives', async () => {
-        const directives = await templateDirectiveRegistry.getAll();
+        const directives = await templateDirectiveFactory.getAll();
         expect(dynamicFilesLoaderMock.getAllMock).toHaveBeenCalledTimes(1);
         expect(caseConvertorMock.convertPascalToUnderscore).toHaveBeenCalledTimes(Object.keys(directives).length + 1);
     })
@@ -35,7 +35,7 @@ describe('get', () => {
     });
 
     it('Successfully loading all template directives', async () => {
-        const directive = await templateDirectiveRegistry.get();
+        const directive = await templateDirectiveFactory.get();
         expect(dynamicFilesLoaderMock.get).toHaveBeenCalledTimes(1);
         expect(directive).toBe(dynamicFilesLoaderMock.parserFirst);
     })

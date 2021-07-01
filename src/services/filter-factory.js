@@ -8,34 +8,33 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
-import type { TemplateHandlerInterface } from '../api/template-handler-interface';
 
 const DynamicFilesLoader = require('./dynamic-files-loader');
 const CaseConvertor = require('./case-convertor');
 
-class TemplateHandlerRegistry {
-    caseConvertor:Object;
+class FilterFactory {
     dynamicFilesLoader:Object;
+    caseConvertor:Object;
 
     /**
      * @constructor
      */
     constructor() {
+        this.dynamicFilesLoader = new DynamicFilesLoader('filters');
         this.caseConvertor = new CaseConvertor();
-        this.dynamicFilesLoader = new DynamicFilesLoader('template-handlers');
     }
 
     /**
+     * Loads filter by name
      *
-     * @param {string} name
-     * @return {TemplateHandlerInterface}
+     * @param name
+     * @param config
+     * @return {Promise<Object|null>}
      */
-    get(name:string):TemplateHandlerInterface {
-        const Handler = this.dynamicFilesLoader.get(
-            this.caseConvertor.convertPascalToDash(name.slice(0, name.length-1))
-        );
-        return new Handler();
+    get(name:string = 'base', config:Object):Function {
+        const Filter = this.dynamicFilesLoader.get(this.caseConvertor.convertPascalToDash(name));
+        return new Filter(config);
     }
 }
 
-module.exports = TemplateHandlerRegistry;
+module.exports = FilterFactory;

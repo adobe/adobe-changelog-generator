@@ -11,19 +11,19 @@ governing permissions and limitations under the License.
 import type { TemplateDirectiveInterface } from '../api/template-directive-interface';
 import type { TemplateHandlerInterface } from '../api/template-handler-interface';
 
-const TemplateDirectiveRegistry = require('./template-directive-registry');
-const TemplateHandlerRegistry = require('./template-handler-registry');
+const TemplateDirectiveFactory = require('./template-directive-factory');
+const TemplateHandlerFactory = require('./template-handler-factory');
 
 class TemplateEngine {
-    templateDirectiveRegistry:Object;
-    templateHandlerRegistry:Object;
+    templateDirectiveFactory:Object;
+    templateHandlerFactory:Object;
 
     /**
      * @constructor
      */
     constructor() {
-        this.templateDirectiveRegistry = new TemplateDirectiveRegistry();
-        this.templateHandlerRegistry = new TemplateHandlerRegistry();
+        this.templateDirectiveFactory = new TemplateDirectiveFactory();
+        this.templateHandlerFactory = new TemplateHandlerFactory();
     }
 
     /**
@@ -35,7 +35,7 @@ class TemplateEngine {
      */
     async generateByTemplate(template:string, data:Object):Promise<string> {
         const parsedTemplateTree = this.getTemplateForRepeats(template);
-        const directives:Array<TemplateDirectiveInterface> = await this.templateDirectiveRegistry.getAll();
+        const directives:Array<TemplateDirectiveInterface> = await this.templateDirectiveFactory.getAll();
         const evaluatedTemplateTree = await this.getEvaluatedTemplateByTree(parsedTemplateTree, data, {}, [], directives);
         return this.getEvaluatedStringByEvaluatedTree(evaluatedTemplateTree);
     }
@@ -75,7 +75,7 @@ class TemplateEngine {
      */
     async getEvaluatedTemplateByTree(templateTree:Array<Object>, data:Object, variables:Object, iteration = [], directives?:Object):Array<Object> {
         templateTree.forEach((item:Object) => {
-            const handler:TemplateHandlerInterface = this.templateHandlerRegistry.get(item.type);
+            const handler:TemplateHandlerInterface = this.templateHandlerFactory.get(item.type);
             const handlerResults = handler.execute(item.template, data, variables, directives);
             handlerResults.forEach((handlerResult:Array<Object>) => {
                 const nestedObject = {evaluatedTemplate: handlerResult.evaluatedTemplate};

@@ -54,14 +54,14 @@ class Config {
      * @return {*|{}}
      */
     getFilters():Object {
-        return _.get(this.data, 'loader.config.exclude') || {};
+        return _.get(this.data, 'filters') || [];
     }
 
     /**
-     * @return {string[]}
+     * @return Array
      */
-    getFilterNames():Array<string> {
-        return Object.keys(this.getFilters());
+    getProcessors():Array<Object> {
+        return this.data.processors || [];
     }
 
     /**

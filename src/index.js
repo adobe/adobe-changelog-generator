@@ -12,7 +12,7 @@ governing permissions and limitations under the License.
 const _ = require('lodash');
 const ConfigLoader = require('./services/config-loader');
 const ChangelogDataGenerator = require("./services/changelog-data-generator");
-const ChangelogWriterRegistry = require('./services/changelog-writer-registry');
+const ChangelogWriterFactory = require('./services/changelog-writer-factory');
 const GithubService = require('./services/github');
 const Config = require('./models/config');
 const ConfigGenerator = require('./services/config-generator');
@@ -34,7 +34,7 @@ class Index {
     constructor(githubToken:string, githubUrl:string, configPath?:string, configPathType?:string) {
         this.githubService = new GithubService(githubToken, githubUrl);
         this.configLoader = new ConfigLoader(this.githubService);
-        this.changelogWriterRegistry = new ChangelogWriterRegistry();
+        this.changelogWriterFactory = new ChangelogWriterFactory();
         this.configPath = configPath;
         this.configPathType = configPathType;
         this.configGenerator = new ConfigGenerator();
@@ -62,7 +62,7 @@ class Index {
             );
             const config = new Config(configOptions);
             const data = await this.changelogDataGenerator.getChangelogData(namespaceName, config);
-            const fileWriter = this.changelogWriterRegistry.get(config.getOutputFormat());
+            const fileWriter = this.changelogWriterFactory.get(config.getOutputFormat());
             promises.push(new Promise((resolve, reject) => {
                 fileWriter.write(
                     data,

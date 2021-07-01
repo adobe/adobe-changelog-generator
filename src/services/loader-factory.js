@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 const DynamicFilesLoader = require('./dynamic-files-loader');
 const CaseConvertor = require('./case-convertor');
 
-class LoaderRegistry {
+class LoaderFactory {
     dynamicFilesLoader:Object
     caseConvertor:Object
 
@@ -36,4 +36,4 @@ class LoaderRegistry {
     }
 }
 
-module.exports = LoaderRegistry;
+module.exports = LoaderFactory;

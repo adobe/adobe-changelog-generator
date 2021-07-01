@@ -1,11 +1,20 @@
 {
-  "oco-test/main-repo:main": {
-    "releaseLine": "0fbda12fcd8bd29dc17a11f08ae506a876130035..fd7ebb1d0cd224e0957c035faafdffd9bd2b2b87@2.9.1:2222",
-    "combine": {
-      "oco-test/buddy-repo:main": "79812ff63ed29693793c163a4e661706db342ae1..cc2dfa5db4feceb2aebe8bedc05c41bcec975e08@2.1.1:3333"
-    },
-    "output": {
-      "path": "<test_path>"
+    "magento/magento2:2.4-develop": {
+        "releaseLine": "2021-05-01..2021-05-15@2.4.3:2.4.[0-9]$",
+        "loader": {
+            "name": "Pullrequest",
+            "config": {
+                "groupBy": {
+                    "name" : "labels",
+                    "config": {
+                        "P2": ["Priority: P2"]
+                    }
+                }
+            }
+        },
+        "output": {
+            "template": "pullrequest",
+            "format": "md"
+        }
     }
-  }
 }

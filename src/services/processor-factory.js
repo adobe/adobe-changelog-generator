@@ -8,33 +8,32 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
-
 const DynamicFilesLoader = require('./dynamic-files-loader');
 const CaseConvertor = require('./case-convertor');
 
-class GroupRegistry {
-    dynamicFilesLoader:Object;
-    caseConvertor:Object;
+class ProcessorFactory {
+    dynamicFilesLoader:Object
+    caseConvertor:Object
 
     /**
      * @constructor
      */
     constructor() {
-        this.dynamicFilesLoader = new DynamicFilesLoader('groups');
+        this.dynamicFilesLoader = new DynamicFilesLoader('processors');
         this.caseConvertor = new CaseConvertor();
     }
 
     /**
-     * Loads group by name
+     * Loads processor by name
      *
      * @param name
      * @param config
      * @return {Promise<Object|null>}
      */
     get(name:string, config:Object):Function {
-        const Group = this.dynamicFilesLoader.get(this.caseConvertor.convertPascalToDash(name));
-        return new Group(config);
+        const Processor = this.dynamicFilesLoader.get(this.caseConvertor.convertPascalToDash(name));
+        return new Processor(config);
     }
 }
 
-module.exports = GroupRegistry;
+module.exports = ProcessorFactory;

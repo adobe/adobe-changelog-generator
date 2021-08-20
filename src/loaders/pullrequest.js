@@ -140,7 +140,7 @@ class PullRequestLoader implements LoaderInterface {
   		labels: item.labels.nodes,
           additionalFields: {},
           type: 'pullrequest',
-          crossreference: item.timelineItems.edges.length ? item.timelineItems.edges.filter((elem:Object) =>
+          crossReference: item.timelineItems.edges.length ? item.timelineItems.edges.filter((elem:Object) =>
               elem.node.source.repository
           ).map((elem:Object) => ({
               type: 'issue',

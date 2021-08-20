@@ -53,7 +53,7 @@ class JsonFormatMagento implements ChangelogWriterInterface {
                 changelogData[namespace][release].data.forEach((data:Object) => {
                     if (data.type === 'pullrequest') {
                         const issues = {};
-                        data.crossreference.forEach((item:Object) => issues[item.number] = item);
+                        data.crossReference.forEach((item:Object) => issues[item.number] = item);
                         releaseData['pull-requests'][`${data.organization}/${data.repository}/${data.number}`] = {
                             ...data,
                             'user': { login: data.author},
@@ -62,7 +62,7 @@ class JsonFormatMagento implements ChangelogWriterInterface {
                     }
                     if (data.type === 'issue') {
                         const prs = {};
-                        data.crossreference.forEach((item:Object) => prs[item.number] = item);
+                        data.crossReference.forEach((item:Object) => prs[item.number] = item);
                         releaseData['issues'][`${data.organization}/${data.repository}/${data.number}`] = {
                             ...data,
                             'user': { login: data.author},

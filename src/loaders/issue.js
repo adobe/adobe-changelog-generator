@@ -129,7 +129,7 @@ class IssueLoader implements LoaderInterface {
           mergedAt: item.mergedAt,
           additionalFields: {},
           type: 'issue',
-          crossreference: item.timelineItems.edges.length ? item.timelineItems.edges.filter((elem:Object) =>
+          crossReference: item.timelineItems.edges.length ? item.timelineItems.edges.filter((elem:Object) =>
               elem.node.source.repository
           ).map((elem:Object) => ({
               repository: elem.node.source.repository.name,

@@ -13,7 +13,7 @@ import type { TemplateHandlerInterface } from '../api/template-handler-interface
 
 const TemplateStringProcessor = require('../services/template-string-processor');
 
-class CrossreferenceHandle implements TemplateHandlerInterface {
+class CrossReferenceHandler implements TemplateHandlerInterface {
     templateStringProcessor:Object;
 
     /**
@@ -34,7 +34,7 @@ class CrossreferenceHandle implements TemplateHandlerInterface {
     execute(template:string, data:Object, variables = {}, directives = {}) {
         const results = [];
         data = data || [];
-        data.crossreference.forEach((item:Object) => {
+        data.crossReference.forEach((item:Object) => {
             variables.reference_number = item.number;
             variables.reference_organization = item.organization;
             variables.reference_repository = item.repository;
@@ -55,4 +55,4 @@ class CrossreferenceHandle implements TemplateHandlerInterface {
     }
 }
 
-module.exports = CrossreferenceHandle;
+module.exports = CrossReferenceHandler;

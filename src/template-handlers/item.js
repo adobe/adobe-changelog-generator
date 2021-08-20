@@ -42,7 +42,7 @@ class ItemHandler implements TemplateHandlerInterface {
             variables.title = item.title;
             variables.url = item.url;
             variables['merged_at'] = item.mergedAt;
-            variables['crossreference'] = item.crossreference;
+            variables['crossReference'] = item.crossReference;
             results.push({
                 evaluatedTemplate: this.templateStringProcessor.evaluateStringTemplate(
                     template,

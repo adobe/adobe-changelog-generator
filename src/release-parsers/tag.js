@@ -66,7 +66,8 @@ class Tag implements ReleaseParsersInterface {
      */
     async getToDate(org:string, repo:string, point:string, filter:?RegExp):Promise<Date> {
         const ref = await this.githubRestClient.git.getRef({owner: org, repo, ref: `tags/${point}`});
-        const commit = await this.githubRestClient.git.getCommit({owner: org, repo, commit_sha: ref.data.object.sha});
+        const tag = await this.githubRestClient.git.getTag({owner: org, repo, tag_sha: ref.data.object.sha})
+        const commit = await this.githubRestClient.git.getCommit({owner: org, repo, commit_sha: tag.data.object.sha});
         return _.get(commit, 'data.committer.date') ?
             new Date(_.get(commit, 'data.committer.date')) :
             null;

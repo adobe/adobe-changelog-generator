@@ -51,7 +51,7 @@ class PullRequestLoader implements LoaderInterface {
   	do {
   		after = cursor ? `after:"${cursor}"` : '';
   		query = `{
-        search(first: 25, query: "repo:${organization}/${repository} is:pr base:${branch} is:merged merged:${startDate}..${endDate}", type: ISSUE ${after}) {
+        search(first: 10, query: "repo:${organization}/${repository} is:pr base:${branch} is:merged merged:${startDate}..${endDate}", type: ISSUE ${after}) {
           nodes {
             ... on PullRequest {
               title
@@ -120,7 +120,7 @@ class PullRequestLoader implements LoaderInterface {
   		hasNextPage = response.search.pageInfo.hasNextPage;
   		cursor = response.search.pageInfo.endCursor;
   		result = [...result, ...response.search.nodes];
-  	} while (hasNextPage);
+  	} while (false);
 
   	const regexpFirst = /\[bot\]/gm;
   	const regexpSecond = /(-|^)bot(-|$)/gm;

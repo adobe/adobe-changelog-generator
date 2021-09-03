@@ -35,11 +35,21 @@ class Base implements FilterInterface {
         const conditions = _.isArray(this.config.conditions[0]) ?
             this.config.conditions :
             [this.config.conditions];
-
-
         if (this.config.level) {
-            data.forEach((elem:Object) => elem[this.config.level] = elem[this.config.level]
-                .filter((item:Object) => this.filterConditionService.isSatisfyingOrConditions(item, conditions)));
+            data.forEach((elem:Object) => {
+                if (!_.get(elem, this.config.level)) {
+                    throw new Error(
+                        `Cannot find field "${this.config.level}".
+                         Please check "level" property of filter configuration`
+                    );
+                }
+                _.set(
+                    elem,
+                    this.config.level,
+                    _.get(elem, this.config.level)
+                        .filter((item:Object) => this.filterConditionService.isSatisfyingOrConditions(item, conditions))
+                );
+            });
         } else {
             data = data.filter((item:Object) => this.filterConditionService.isSatisfyingOrConditions(item, conditions));
         }

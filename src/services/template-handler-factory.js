@@ -26,15 +26,19 @@ class TemplateHandlerFactory {
     }
 
     /**
-     *
-     * @param {string} name
-     * @return {TemplateHandlerInterface}
+     * @param name
+     * @param config
+     * @return {*}
      */
-    get(name:string):TemplateHandlerInterface {
+    get(name:string, config:Object):TemplateHandlerInterface {
         const Handler = this.dynamicFilesLoader.get(
-            this.caseConvertor.convertPascalToDash(name.slice(0, name.length-1))
+            this.caseConvertor.convertPascalToDash(
+                name.slice(name.length-1) === 's' ?
+                    name.slice(0, name.length-1) :
+                    name
+            )
         );
-        return new Handler();
+        return new Handler(config);
     }
 }
 

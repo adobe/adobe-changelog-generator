@@ -20,8 +20,9 @@ class ContributionTypeHandler implements TemplateHandlerInterface {
     /**
      * @constructor
      */
-    constructor() {
+    constructor(config) {
         this.templateStringProcessor = new TemplateStringProcessor();
+        this.config = config;
     }
 
     /**
@@ -33,29 +34,53 @@ class ContributionTypeHandler implements TemplateHandlerInterface {
      * @return {Array<Object>}
      */
     execute(template:string, data:Object, variables = {}, directives = {}):Array<Object> {
-        const dataWithoutContributionType = data.filter((item:Object) => !item.contributionType);
-        const dataWithContributionType = data.filter((item:Object) => item.contributionType);
-        const contributionTypes = _.uniq(dataWithContributionType.map((item:Object) => item.contributionType));
         const results = [];
-
-        if (dataWithoutContributionType.length) {
+        const dataWithoutGroupByValue = data.filter((item:Object) => {
+            const val = _.get(item, this.config.getGroupBy());
+            if (Array.isArray(val)) {
+                return !val[0];
+            }
+            return !val;
+        });
+        const dataWithGroupByValue = data.filter((item:Object) => {
+            const val = _.get(item, this.config.getGroupBy());
+            if (Array.isArray(val)) {
+                return val[0];
+            }
+            return val;
+        });
+        const groupByValues = _.uniq(dataWithGroupByValue.map((item:Object) => {
+            let val = _.get(item, this.config.getGroupBy());
+            if (Array.isArray(val)) {
+                val = val[0];
+            }
+            return val;
+        }));
+        if (dataWithoutGroupByValue.length) {
             results.push({
                 evaluatedTemplate: '',
                 variables,
-                data: dataWithoutContributionType,
+                data: dataWithoutGroupByValue,
                 directives
             });
         }
 
-        contributionTypes.forEach((contributionType:Object) => {
-            variables['contribution_type'] = contributionType;
+        groupByValues.forEach((groupByValue:Object) => {
+            variables['group_by'] = groupByValue;
             results.push({
                 evaluatedTemplate: this.templateStringProcessor.evaluateStringTemplate(
                     template,
                     variables,
                     directives
                 ),
-                data: data.filter((item:Object) => item.contributionType === contributionType),
+                data: dataWithGroupByValue.filter((item:Object) => {
+                    let val = _.get(item, this.config.getGroupBy());
+                    if (Array.isArray(val)) {
+                        return val[0] === groupByValue;
+                    }
+
+                    return val === groupByValue;
+                }),
                 variables,
                 directives
             });

@@ -35,7 +35,11 @@ class Md implements ChangelogWriterInterface {
      */
     async write(changelogData:Array<string>, config:Object, callback?:Function) {
         const template = templateRegistry.get(config.getTemplate());
-        const evaluatedTemplateString = await this.templateEngine.generateByTemplate(template, changelogData);
+        const evaluatedTemplateString = await this.templateEngine.generateByTemplate(
+            template,
+            changelogData,
+            config
+        );
         try {
             if (config.getOutputStrategy() === 'create') {
                 fileService.create(

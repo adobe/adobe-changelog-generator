@@ -14,7 +14,6 @@ import type {FilterInterface} from '../api/filter-interface';
 const _ = require('lodash');
 const GithubService = require('./github');
 const asyncService = require('./async');
-const GroupFactory = require('./group-factory');
 const LoaderFactory = require('./loader-factory');
 const ProcessorFactory = require('./processor-factory');
 const FilterFactory = require('./filter-factory');
@@ -35,7 +34,6 @@ class ChangelogDataGenerator {
         this.githubService = githubService;
         this.rangeService = new RangeService(this.githubService);
         this.githubNamespaceParser = new GithubNamespaceParser();
-        this.groupFactory = new GroupFactory();
         this.loaderFactory = new LoaderFactory();
         this.processorFactory = new ProcessorFactory();
         this.filterFactory = new FilterFactory();
@@ -51,9 +49,6 @@ class ChangelogDataGenerator {
      */
     async getChangelogData(namespaceName:string, config:Object) {
         const loader:LoaderInterface = await this.loaderFactory.get(config.getLoaderName(), this.githubService);
-        const groupBy = config.getGroupName() ?
-            await this.groupFactory.get(config.getGroupName(), config.getGroupConfig()) :
-            null;
         const filters = await this.getFilters(config);
         const processors = await this.getProcessors(config);
         return await asyncService.mapValuesAsync(
@@ -62,7 +57,6 @@ class ChangelogDataGenerator {
                 namespaceName,
                 releaseLine,
                 loader,
-                groupBy,
                 filters,
                 processors
             )
@@ -75,7 +69,6 @@ class ChangelogDataGenerator {
      * @param {string} namespaceName - namespace name
      * @param {string} termsLine - release line field from configuration. Pattern: <type>..<type>@<version>:<regexp>
      * @param {Object} loader - Data loader
-     * @param {Object|null} groupBy - Groups data
      * @param {Array<Object>|null} filters - Filters data
      * @param {Array<Object>|null} processors
      * @return {Promise<Object>}
@@ -84,7 +77,6 @@ class ChangelogDataGenerator {
         namespaceName:string,
         termsLine:string,
         loader:LoaderInterface,
-        groupBy?:Object,
         filters?:Array<FilterInterface>,
         processors?:Array<Object>
     ):Array<Object> {
@@ -119,9 +111,6 @@ class ChangelogDataGenerator {
 
         if (filters && filters.length) {
             data = await this.applyFilters(data, filters);
-        }
-        if (groupBy) {
-            data = await this.applyGrouping(data, [groupBy]);
         }
 
         return this.mapDataToVersionsMapping(data, versionsRange);
@@ -182,20 +171,6 @@ class ChangelogDataGenerator {
     async getProcessors(sharedConfig:Object):Array<Object> {
         return await asyncService.mapAsync(sharedConfig.getProcessors(), (processor:Object) =>
             this.processorFactory.get(processor.name, processor));
-    }
-
-    /**
-     * Apply grouping on array of data
-     *
-     * @param {Array<Object>} data - loaded data
-     * @param {Array<Object>} groupBy - array of group class instances
-     * @return {Promise<Array<Object>>} - grouped data
-     */
-    async applyGrouping(data:Array<Object>, groupBy:Array<Object>) {
-        for (const group of groupBy) {
-            data = group.execute(data);
-        }
-        return data;
     }
 
     /**

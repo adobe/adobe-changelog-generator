@@ -33,6 +33,17 @@ class SelectedLabels {
                 item.additionalFields[this.config.field] = item.labels
                     .map((label:Object) => label.name)
                     .filter((label:string) => !!label.match(this.config.labelRegExp));
+
+                if (this.config.replace) {
+                    item.additionalFields[this.config.field] = item.additionalFields[this.config.field]
+                        .map((label:string) => {
+                            let modifiedLabel;
+                            Object.keys(this.config.replace).forEach((replace:string) => {
+                                modifiedLabel = label.replace(replace, this.config.replace[replace]);
+                            });
+                            return modifiedLabel;
+                        });
+                }
             }
 
             return item;

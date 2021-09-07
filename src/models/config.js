@@ -75,15 +75,8 @@ class Config {
     /**
      * @return {string}
      */
-    getGroupName():string {
-        return _.get(this.data, 'loader.config.groupBy.name');
-    }
-
-    /**
-     * @return {Object}
-     */
-    getGroupConfig():Object {
-        return _.get(this.data, 'loader.config.groupBy.config');
+    getGroupBy():string {
+        return _.get(this.data, 'output.groupBy');
     }
 
     /**

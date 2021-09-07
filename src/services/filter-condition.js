@@ -65,7 +65,7 @@ class FilterCondition {
      */
     isSatisfyingAndConditions(item:Object, conditions:Array):Boolean {
         const result = [];
-        conditions.forEach((condition:Object) => result.push(this.getCondition(item[condition.where], condition)));
+        conditions.forEach((condition:Object) => result.push(this.getCondition(_.get(item, condition.where), condition)));
         return _.every(result);
     }
 }

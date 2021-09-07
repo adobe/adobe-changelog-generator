@@ -13,6 +13,7 @@ import type { TemplateHandlerInterface } from '../api/template-handler-interface
 
 const TemplateDirectiveFactory = require('./template-directive-factory');
 const TemplateHandlerFactory = require('./template-handler-factory');
+const _ = require('lodash');
 
 class TemplateEngine {
     templateDirectiveFactory:Object;
@@ -33,10 +34,17 @@ class TemplateEngine {
      * @param {Object} data
      * @return {Promise<string>}
      */
-    async generateByTemplate(template:string, data:Object):Promise<string> {
-        const parsedTemplateTree = this.getTemplateForRepeats(template);
+    async generateByTemplate(template:string, data:Object, config:Object):Promise<string> {
+        const parsedTemplateTree = this.getTemplateForRepeats({template, type: 'top'});
         const directives:Array<TemplateDirectiveInterface> = await this.templateDirectiveFactory.getAll();
-        const evaluatedTemplateTree = await this.getEvaluatedTemplateByTree(parsedTemplateTree, data, {}, [], directives);
+        const evaluatedTemplateTree = await this.getEvaluatedTemplateByTree(
+            parsedTemplateTree,
+            data,
+            {},
+            [],
+            directives,
+            config
+        );
         return this.getEvaluatedStringByEvaluatedTree(evaluatedTemplateTree);
     }
 
@@ -50,14 +58,22 @@ class TemplateEngine {
         let templateString = '';
 
         templateTree.forEach((item:Object) => {
-            templateString += item.evaluatedTemplate;
             if (item.inside) {
-                templateString += this.getEvaluatedStringByEvaluatedTree(item.inside);
+                if (!item.inside.length) {
+                    item.evaluatedTemplate = '';
+                } else {
+                    _.uniq(item.inside.map(elem => elem.repeatIndex)).forEach((index:number) => {
+                        item.evaluatedTemplate = item.evaluatedTemplate.replace(
+                            `<placeholder-repeat-${index}>`,
+                            this.getEvaluatedStringByEvaluatedTree(
+                                item.inside.filter((elem:Object) => elem.repeatIndex === index)
+                            )
+                        );
+                    });
+                }
             }
 
-            if (item.insertAfter) {
-                templateString += item.insertAfter;
-            }
+            templateString += item.evaluatedTemplate;
         });
 
         return templateString;
@@ -73,19 +89,17 @@ class TemplateEngine {
      * @param {Object} directives
      * @return {Promise<Array<Object>>}
      */
-    async getEvaluatedTemplateByTree(templateTree:Array<Object>, data:Object, variables:Object, iteration = [], directives?:Object):Array<Object> {
-        templateTree.forEach((item:Object) => {
-            const handler:TemplateHandlerInterface = this.templateHandlerFactory.get(item.type);
+    async getEvaluatedTemplateByTree(templateTree:Array<Object>, data:Object, variables:Object, iteration = [], directives?:Object, config:Object):Array<Object> {
+        templateTree.forEach((item:Object, index:number) => {
+            const handler:TemplateHandlerInterface = this.templateHandlerFactory.get(item.type, config);
             const handlerResults = handler.execute(item.template, data, variables, directives);
             handlerResults.forEach((handlerResult:Array<Object>) => {
-                const nestedObject = {evaluatedTemplate: handlerResult.evaluatedTemplate};
-                if (item.repeatDirective === 'scope_content') {
-                    nestedObject.insertAfter =
-                        `<!--${item.type}_${handlerResult.variables.organization}_${handlerResult.variables.repository}_scope_end-->`;
-                    nestedObject.evaluatedTemplate +=
-                        `<!--${item.type}_${handlerResult.variables.organization}_${handlerResult.variables.repository}_scope_start-->`;
-                }
-
+                const nestedObject = {
+                    evaluatedTemplate: handlerResult.evaluatedTemplate,
+                    type: item.type,
+                    repeatIndex: index,
+                    item
+                };
                 iteration.push(nestedObject);
                 if (item.inside) {
                     nestedObject.inside = [];
@@ -94,7 +108,8 @@ class TemplateEngine {
                         handlerResult.data,
                         handlerResult.variables,
                         nestedObject.inside,
-                        directives
+                        directives,
+                        config
                     );
                 }
             });
@@ -104,58 +119,28 @@ class TemplateEngine {
     }
 
     /**
-     * Find and returns all repeats declaration on the same level
-     *
-     * @param {string} templateString
-     * @param {Array} repeats
-     * @return {Array<string>}
-     */
-    getSameLevelRepeats(templateString, repeats = []) {
-        const dataRepeat = this.findRepeat(templateString);
-        if (dataRepeat) {
-            repeats.push(dataRepeat);
-            this.getSameLevelRepeats(
-                templateString.substring(
-                    dataRepeat.endRepeatIndexTo,
-                    templateString.length
-                ),
-                repeats
-            );
-        }
-
-        return repeats;
-    }
-
-    /**
      * Parse string template to tree data structure
      *
-     * @param {string} templateString
-     * @param {Array<string>} repeats
+     * @param {Object} parent
      * @return {Array<Object>}
      */
-    getTemplateForRepeats(templateString:string, repeats = []) {
-        const sameLevelRepeats = this.getSameLevelRepeats(templateString);
-        sameLevelRepeats.forEach((dataRepeat:Object) => {
-            const internalDataRepeat = this.findRepeat(dataRepeat.template);
+    getTemplateForRepeats(parent = {}) {
+        let nextRepeat = this.findRepeat(parent.template);
+        let i = 0;
+        while (nextRepeat) {
             const data = {
-                type: dataRepeat.name,
-                template: dataRepeat.template
+                type: nextRepeat.name,
+                template: nextRepeat.template,
             };
+            parent.inside = parent.inside || [];
+            parent.inside.push(data);
+            parent.template = parent.template.substring(0, nextRepeat.startRepeatIndexFrom) +  `<placeholder-repeat-${i}>` +  parent.template.substring(nextRepeat.endRepeatIndexTo);
+            this.getTemplateForRepeats(data);
+            nextRepeat = this.findRepeat(parent.template);
+            i++;
+        }
 
-            if (dataRepeat.repeatDirective) {
-                data.repeatDirective = dataRepeat.repeatDirective;
-            }
-
-            if (internalDataRepeat) {
-                data.inside = [];
-                data.template = dataRepeat.template.substring(0, internalDataRepeat.startRepeatIndexFrom);
-                this.getTemplateForRepeats(dataRepeat.template, data.inside);
-            }
-
-            repeats.push(data);
-        });
-
-        return repeats;
+        return [parent];
     }
 
     /**
